@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:chopper/chopper.dart';
 import 'package:fireflyapp/data/src/account/api/account_array.dart';
 import 'package:fireflyapp/data/src/account/api/account_service.dart';
-import 'package:fireflyapp/data/src/api/json_type_converter.dart';
+import 'package:fireflyapp/data/src/api/http_error_converter.dart';
+import 'package:fireflyapp/data/src/api/http_throw_exception_interceptor.dart';
+import 'package:fireflyapp/data/src/api/json_serializable_converter.dart';
 import 'package:oauth2/oauth2.dart' as oauth2;
 
 class FireflyHttpClient {
@@ -59,17 +61,17 @@ class FireflyHttpClient {
   }
 
   ChopperClient _createChopper() {
+    JsonSerializableConverter converter = JsonSerializableConverter({
+      AccountArray: (Map<String, dynamic> jsonData) =>
+          AccountArray.fromJson(jsonData),
+    });
     return ChopperClient(
       baseUrl: Uri.https('firefly.clemenskeppler.de', '/api/v1').toString(),
       client: _authedClient,
-      converter: JsonToTypeConverter({
-        AccountArray: (Map<String, dynamic> jsonData) =>
-            AccountArray.fromJson(jsonData)
-      }),
-      services: [
-        // inject the generated service
-        AccountService.create()
-      ],
+      converter: converter,
+      errorConverter: HttpErrorConverter(),
+      interceptors: <ResponseInterceptor>[HttpThrowExceptionInterceptor()],
+      services: [AccountService.create()],
     );
   }
 
