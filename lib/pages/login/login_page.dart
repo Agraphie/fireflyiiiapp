@@ -1,3 +1,4 @@
+import 'package:fireflyapp/application.dart';
 import 'package:fireflyapp/pages/login/login_model.dart';
 import 'package:fireflyapp/pages/login/login_view_model.dart';
 import 'package:fireflyapp/widget/bezierContainer.dart';
@@ -47,7 +48,14 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(
                     height: 40,
                   ),
-                  _submitButton(context, loginViewModel)
+                  _submitButton(context, loginViewModel),
+                  Application.isDebugMode
+                      ? Container(
+                          child:
+                              _loginWithMockDataButton(context, loginViewModel),
+                          padding: const EdgeInsets.only(top: 20),
+                        )
+                      : Container()
                 ],
               ),
             )),
@@ -121,16 +129,47 @@ class LoginPage extends StatelessWidget {
               // TODO: Handle this case.
               break;
           }
-          return ProgressButton(
-            child: const Text(
-              'Login',
-              style: TextStyle(fontSize: 20, color: Colors.white),
-            ),
-            onPressed: loginViewModel.submit,
-            buttonState: btnState,
-            progressColor: Theme.of(context).scaffoldBackgroundColor,
-          );
+          return _loginButton(loginViewModel.submit, btnState, context);
         });
+  }
+
+  Widget _loginWithMockDataButton(
+      BuildContext context, LoginViewModel loginViewModel) {
+    return StreamBuilder<LoginModelState>(
+        stream: loginViewModel.state,
+        builder: (context, snapshot) {
+          ButtonState btnState;
+          switch (snapshot.data) {
+            case LoginModelState.loading:
+              btnState = ButtonState.inProgress;
+              break;
+            case LoginModelState.error:
+              btnState = ButtonState.error;
+              break;
+            case LoginModelState.initial:
+              btnState = ButtonState.normal;
+              break;
+            case LoginModelState.success:
+              // TODO: Handle this case.
+              break;
+          }
+          return _loginButton(loginViewModel.submitMockData, btnState, context,
+              title: 'Login with mock data');
+        });
+  }
+
+  ProgressButton _loginButton(
+      Function submitAction, ButtonState btnState, BuildContext context,
+      {String title = 'Login'}) {
+    return ProgressButton(
+      child: Text(
+        title,
+        style: TextStyle(fontSize: 20, color: Colors.white),
+      ),
+      onPressed: () => submitAction(),
+      buttonState: btnState,
+      progressColor: Theme.of(context).scaffoldBackgroundColor,
+    );
   }
 
   Widget _title(BuildContext context) {

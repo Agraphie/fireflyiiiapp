@@ -43,6 +43,15 @@ class LoginViewModel with ChangeNotifier, WidgetsBindingObserver {
     }
   }
 
+  void submitMockData() {
+    _loginModel.state = LoginModelState.loading;
+    _loginState.add(LoginModelState.loading);
+    _authProvider
+        .loginWithMockData()
+        .then((dynamic _) => _loginState.add(LoginModelState.success))
+        .then((_) => Navigator.pop(_context));
+  }
+
   Stream<String> get secretStream => _secret.stream;
 
   Stream<bool> get isValid => _isValid.stream;

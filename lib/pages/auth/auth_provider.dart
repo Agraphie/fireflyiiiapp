@@ -1,4 +1,5 @@
 import 'package:chopper/chopper.dart';
+import 'package:fireflyapp/application.dart';
 import 'package:fireflyapp/data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,7 +58,7 @@ class AuthProvider with ChangeNotifier {
     return getUriLinksStream().first.then((Uri uri) => uri.queryParameters);
   }
 
-  Future<bool> login(Uri baseUri, String secret, String identifier) async {
+  Future<bool> login(Uri baseUri, String secret, String identifier) {
     if (_isLoggedIn) {
       return Future.value(true);
     }
@@ -69,6 +70,17 @@ class AuthProvider with ChangeNotifier {
       _saveBaseUri(baseUri);
       return c;
     }).then(successfullyLoggedIn);
+  }
+
+  Future<bool> loginWithMockData() {
+    if (_isLoggedIn) {
+      return Future.value(true);
+    }
+
+    return Future<dynamic>.delayed(const Duration(seconds: 1))
+        .then((dynamic _) => true)
+        .then((_) => Application.mockDataEnabled = true)
+        .then(successfullyLoggedIn);
   }
 
   FireflyHttpClient _buildClient(Uri uri) {
@@ -99,10 +111,12 @@ class AuthProvider with ChangeNotifier {
     SharedPreferences.getInstance().then((sp) {
       sp..remove(_baseUriKey)..remove(_credentialsKey);
     });
-    _fireflyHttpClient.dispose();
+    // Possibly in mock state, so not available
+    _fireflyHttpClient?.dispose();
     _fireflyHttpClient = null;
     _baseUri = null;
     _isLoggedIn = false;
+    Application.reset();
     notifyListeners();
   }
 }

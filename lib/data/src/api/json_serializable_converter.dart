@@ -1,8 +1,8 @@
 import 'package:chopper/chopper.dart';
-import 'package:fireflyapp/data/src/api/http_error.dart';
 
 typedef T JsonFactory<T>(Map<String, dynamic> json);
 
+// ignore_for_file: argument_type_not_assignable
 class JsonSerializableConverter extends JsonConverter {
   final Map<Type, JsonFactory> factories;
 
@@ -37,7 +37,7 @@ class JsonSerializableConverter extends JsonConverter {
       return response.body as Response<ResultType>;
     }
     // use [JsonConverter] to decode json
-    final jsonRes = super.convertResponse(response);
+    final jsonRes = super.convertResponse<ResultType, Item>(response);
 
     return jsonRes.copyWith<ResultType>(body: _decode<Item>(jsonRes.body));
   }
