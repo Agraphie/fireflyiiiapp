@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:rxdart/rxdart.dart';
@@ -6,9 +7,13 @@ class EditTransactionModel {
   DateTime transactionDate;
   String fromAccount;
   String toAccount;
-  List<File> attachments;
+  Set<File> attachments = HashSet(hashCode: (f) {
+    return f.path.hashCode;
+  }, equals: (k1, k2) {
+    return k1.path == k2.path;
+  });
   EditTransactionModelTransaction _lastDeletedTransactionSplit;
-  Map<int, EditTransactionModelTransaction> transactions = {
+  final Map<int, EditTransactionModelTransaction> _transactions = {
     0: EditTransactionModelTransaction(id: 0)
   };
 
@@ -16,50 +21,61 @@ class EditTransactionModel {
     _initListeners();
   }
 
+  Iterable<EditTransactionModelTransaction> get transactions =>
+      _transactions.values;
+
   void addTransactionSplit() {
-    var e = EditTransactionModelTransaction(id: transactions.length);
-    transactions.putIfAbsent(e.id, () => e);
-    transactionsSubject.add(transactions.values.toList());
+    var e = EditTransactionModelTransaction(id: _transactions.length);
+    _transactions.putIfAbsent(e.id, () => e);
+    transactionsSubject.add(_transactions.values.toList());
   }
 
   void removeTransactionSplit(EditTransactionModelTransaction e) {
     _lastDeletedTransactionSplit = e;
-    transactions.remove(e.id);
-    transactionsSubject.add(transactions.values.toList());
+    _transactions.remove(e.id);
+    transactionsSubject.add(_transactions.values.toList());
   }
 
   void undoLastDeleteTransaction() {
     if (_lastDeletedTransactionSplit != null) {
-      transactions.putIfAbsent(
+      _transactions.putIfAbsent(
           _lastDeletedTransactionSplit.id, () => _lastDeletedTransactionSplit);
-      transactionsSubject.add(transactions.values.toList());
+      transactionsSubject.add(_transactions.values.toList());
     }
   }
 
   void updateDescription(
       String description, EditTransactionModelTransaction e) {
-    transactions[e.id].description = description;
+    _transactions[e.id].description = description;
   }
 
   void addTag(String tag, EditTransactionModelTransaction e) {
-    transactions[e.id].tags.add(tag);
-    transactionsSubject.add(transactions.values.toList());
+    _transactions[e.id].tags.add(tag);
+    transactionsSubject.add(_transactions.values.toList());
   }
 
   void removeTag(String t, EditTransactionModelTransaction e) {
-    transactions[e.id].tags.remove(t);
-    transactionsSubject.add(transactions.values.toList());
+    _transactions[e.id].tags.remove(t);
+    transactionsSubject.add(_transactions.values.toList());
   }
 
   void _initListeners() {
-    transactionsSubject = BehaviorSubject.seeded(transactions.values.toList());
+    transactionsSubject = BehaviorSubject.seeded(_transactions.values.toList());
   }
 
   BehaviorSubject<List<EditTransactionModelTransaction>> transactionsSubject;
 
   void updateCategory(String c, EditTransactionModelTransaction e) {
-    transactions[e.id].category = c;
-    transactionsSubject.add(transactions.values.toList());
+    _transactions[e.id].category = c;
+    transactionsSubject.add(_transactions.values.toList());
+  }
+
+  void addFiles(List<File> l) {
+    attachments.addAll(l);
+  }
+
+  void removeFile(File item) {
+    attachments.remove(item);
   }
 }
 

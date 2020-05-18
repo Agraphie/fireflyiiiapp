@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:fireflyapp/application.dart' as application;
 import 'package:fireflyapp/pages/transaction/edit_transaction_model.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_view_model.dart';
@@ -35,27 +38,37 @@ class EditTransactionPage extends StatelessWidget {
           onPressed: vm.addNewTransaction,
           tooltip: 'Add transaction split',
           child: Icon(Icons.add)),
-      body: Padding(
-        padding: const EdgeInsets.all(3.0),
-        child: ListView(children: <Widget>[
-          _buildGlobalInputs(context),
-          StreamBuilder<List<EditTransactionModelTransaction>>(
-              stream: vm.transactionsStream,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Container();
-                }
-                return Column(
-                  children: <Widget>[
-                    ...snapshot.data
-                        .map((EditTransactionModelTransaction item) {
-                      return _buildSingleTransaction(item, context);
-                    }).toList(),
-                  ],
-                );
-              }),
-        ]),
-      ),
+      body: StreamBuilder<EditTransactionModel>(
+          stream: vm.transactionStream,
+          builder: (context, transactionSnap) {
+            if (!transactionSnap.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.all(3.0),
+              child: ListView(children: <Widget>[
+                _buildGlobalInputs(context, transactionSnap.data),
+                StreamBuilder<Iterable<EditTransactionModelTransaction>>(
+                    initialData: transactionSnap.data.transactions,
+                    stream: vm.splitTransactionsStream,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Container();
+                      }
+                      return Column(
+                        children: <Widget>[
+                          ...snapshot.data
+                              .map((EditTransactionModelTransaction item) {
+                            return _buildSingleTransaction(item, context);
+                          }).toList(),
+                        ],
+                      );
+                    }),
+              ]),
+            );
+          }),
     );
   }
 
@@ -92,7 +105,7 @@ class EditTransactionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGlobalInputs(BuildContext context) {
+  Widget _buildGlobalInputs(BuildContext context, EditTransactionModel e) {
     return _buildCard(
       Column(
         children: <Widget>[
@@ -123,18 +136,50 @@ class EditTransactionPage extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          TextFormField(
-            initialValue: _dateFormat.format(DateTime.now()),
-            keyboardType: TextInputType.datetime,
-            decoration: const InputDecoration(labelText: 'Anhänge'),
-            readOnly: true,
-            onTap: () => showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime(1970, 8),
-              lastDate: DateTime(2101),
+          _buildAttachmentSelectField(context, e),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAttachmentSelectField(BuildContext c, EditTransactionModel e) {
+    return Container(
+      width: MediaQuery.of(c).size.width,
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 5.0,
+        children: <Widget>[
+          Container(
+            transform: Matrix4.translationValues(-6.0, 0.0, 0.0),
+            child: ClipOval(
+              child: Container(
+                color: Theme.of(c).accentColor,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.attach_file,
+                  ),
+                  onPressed: () {
+                    FilePicker.getMultiFile().then(vm.addFiles);
+                  },
+                ),
+              ),
             ),
           ),
+          e.attachments.isNotEmpty
+              ? const SizedBox()
+              : const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Keine Anhänge"),
+                ),
+          ...e.attachments.map((File item) {
+            return Chip(
+              label: Text(item.uri.path.split('/').last),
+              deleteIcon: Icon(Icons.clear),
+              deleteIconColor: Colors.white,
+              onDeleted: () => vm.removeFile(item),
+            );
+          }),
         ],
       ),
     );
@@ -191,12 +236,10 @@ class EditTransactionPage extends StatelessWidget {
     return Column(
       children: <Widget>[
         Container(
-          padding: const EdgeInsets.all(0.0),
           transform: Matrix4.translationValues(-6.0, 0.0, 0.0),
           width: MediaQuery.of(context).size.width,
           child: Wrap(
-            spacing: 8.0,
-            runSpacing: 4.0,
+            spacing: 5.0,
             children: <Widget>[
               ...item.tags?.map(
                 (t) => Chip(

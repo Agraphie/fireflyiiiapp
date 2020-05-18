@@ -1,11 +1,19 @@
+import 'dart:io';
+
 import 'package:fireflyapp/pages/transaction/edit_transaction_model.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 class EditTransactionViewModel with ChangeNotifier {
   final EditTransactionModel _editTransactionModel = EditTransactionModel();
 
-  Stream<List<EditTransactionModelTransaction>> get transactionsStream =>
+  Stream<List<EditTransactionModelTransaction>> get splitTransactionsStream =>
       _editTransactionModel.transactionsSubject.stream;
+
+  BehaviorSubject<EditTransactionModel> _editTransactionModelSubject;
+
+  Stream<EditTransactionModel> get transactionStream =>
+      _editTransactionModelSubject.stream;
 
   List<String> tags = ['Käse', 'Wurst'];
   List<String> categories = ['Food', 'Car'];
@@ -38,7 +46,19 @@ class EditTransactionViewModel with ChangeNotifier {
       _editTransactionModel.updateCategory(c, e);
 
   EditTransactionViewModel() {
+    _editTransactionModelSubject =
+        BehaviorSubject.seeded(_editTransactionModel);
     _editTransactionModel.transactionsSubject
         .listen((List<EditTransactionModelTransaction> l) {});
+  }
+
+  void addFiles(List<File> l) {
+    _editTransactionModel.addFiles(l);
+    _editTransactionModelSubject.add(_editTransactionModel);
+  }
+
+  void removeFile(File item) {
+    _editTransactionModel.removeFile(item);
+    _editTransactionModelSubject.add(_editTransactionModel);
   }
 }
