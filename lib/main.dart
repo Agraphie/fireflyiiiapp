@@ -4,6 +4,7 @@ import 'package:fireflyapp/pages/login/login_page.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_page.dart';
 import 'package:fireflyapp/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -33,8 +34,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     AuthProvider authProvider =
         Provider.of<AuthProvider>(context, listen: true);
-    Widget home = authProvider.isLoggedIn ? HomePage.route : WelcomePage();
 
+    Widget home = authProvider.isLoggedIn ? HomePage.route : WelcomePage();
     Map<String, WidgetBuilder> routes = Map.fromEntries([
       LoginPage.route,
       EditTransactionPage.route,
@@ -47,6 +48,11 @@ class MyApp extends StatelessWidget {
       ),
       home: home,
       routes: routes,
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }

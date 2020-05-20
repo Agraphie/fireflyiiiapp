@@ -21,7 +21,7 @@ class EditTransactionPage extends StatelessWidget {
       );
     },
   );
-  static final _dateFormat = DateFormat.yMd();
+  final DateFormat _dateFormat = DateFormat.yMd('de');
 
   final EditTransactionViewModel vm;
 
@@ -148,7 +148,7 @@ class EditTransactionPage extends StatelessWidget {
       child: Wrap(
         alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 5.0,
+        spacing: 3.0,
         children: <Widget>[
           Container(
             transform: Matrix4.translationValues(-6.0, 0.0, 0.0),
@@ -158,6 +158,7 @@ class EditTransactionPage extends StatelessWidget {
                 child: IconButton(
                   icon: Icon(
                     Icons.attach_file,
+                    color: Colors.white,
                   ),
                   onPressed: () {
                     FilePicker.getMultiFile().then(vm.addFiles);
@@ -169,7 +170,7 @@ class EditTransactionPage extends StatelessWidget {
           e.attachments.isNotEmpty
               ? const SizedBox()
               : const Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(6.0),
                   child: Text("Keine Anhänge"),
                 ),
           ...e.attachments.map((File item) {
