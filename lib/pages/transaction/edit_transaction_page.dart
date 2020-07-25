@@ -21,7 +21,7 @@ class EditTransactionPage extends StatelessWidget {
       );
     },
   );
-  final DateFormat _dateFormat = DateFormat.yMd('de');
+  DateFormat _dateFormat;
 
   final EditTransactionViewModel vm;
 
@@ -29,6 +29,8 @@ class EditTransactionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Locale myLocale = Localizations.localeOf(context);
+    _dateFormat = DateFormat.yMd(myLocale.toString());
     return Scaffold(
       backgroundColor: application.neutralBackground,
       appBar: AppBar(
@@ -127,11 +129,10 @@ class EditTransactionPage extends StatelessWidget {
             decoration: const InputDecoration(labelText: 'Date'),
             readOnly: true,
             onTap: () => showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime(1970, 8),
-              lastDate: DateTime(2101),
-            ),
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(1970, 8),
+                lastDate: DateTime(2101)),
           ),
           const SizedBox(
             height: 10,
@@ -303,5 +304,5 @@ class EditTransactionPage extends StatelessWidget {
 class EditTransactionPageArguments {
   final String transactionId;
 
-  EditTransactionPageArguments(this.transactionId);
+  EditTransactionPageArguments([this.transactionId]);
 }

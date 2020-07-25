@@ -1,4 +1,5 @@
 import 'package:fireflyapp/pages/auth/auth_provider.dart';
+import 'package:fireflyapp/pages/settings/settings_page.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,9 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         actions: <Widget>[
           IconButton(
-              icon: Icon(Icons.exit_to_app), onPressed: authProvider.logout)
+              icon: Icon(Icons.settings),
+              onPressed: () =>
+                  Navigator.pushNamed(context, SettingsPage.routeUri))
         ],
       ),
       body: const Center(),
@@ -25,7 +28,7 @@ class HomePage extends StatelessWidget {
         child: Icon(Icons.add),
         onPressed: () => Navigator.pushNamed(
             context, EditTransactionPage.routeName,
-            arguments: EditTransactionPageArguments('1')),
+            arguments: EditTransactionPageArguments()),
       ),
     );
   }

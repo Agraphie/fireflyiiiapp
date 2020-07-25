@@ -1,6 +1,7 @@
 import 'package:fireflyapp/pages/auth/auth_provider.dart';
 import 'package:fireflyapp/pages/home/home_page.dart';
 import 'package:fireflyapp/pages/login/login_page.dart';
+import 'package:fireflyapp/pages/settings/settings_page.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_page.dart';
 import 'package:fireflyapp/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
@@ -36,10 +37,8 @@ class MyApp extends StatelessWidget {
         Provider.of<AuthProvider>(context, listen: true);
 
     Widget home = authProvider.isLoggedIn ? HomePage.route : WelcomePage();
-    Map<String, WidgetBuilder> routes = Map.fromEntries([
-      LoginPage.route,
-      EditTransactionPage.route,
-    ]);
+    Map<String, WidgetBuilder> routes = Map.fromEntries(
+        [EditTransactionPage.route, LoginPage.route, SettingsPage.route]);
 
     return MaterialApp(
       title: 'Firefly III',
@@ -53,6 +52,7 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      supportedLocales: [const Locale.fromSubtags(languageCode: 'de')],
     );
   }
 }
