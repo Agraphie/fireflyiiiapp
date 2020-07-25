@@ -76,35 +76,38 @@ class EditTransactionPage extends StatelessWidget {
 
   Widget _buildSingleTransaction(
       EditTransactionModelTransaction e, BuildContext context) {
-    return AbsorbPointer(
-      absorbing: !vm.deleteTransactionsEnabled,
-      child: Dismissible(
-          child: _buildTransaction(e, context),
-          dismissThresholds: {DismissDirection.startToEnd: 0.5},
-          background: Container(
-            color: Colors.red,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.only(left: 10.0),
-            child: Icon(
-              Icons.delete,
-              color: Colors.white,
-            ),
-          ),
-          key: ObjectKey(e),
-          direction: DismissDirection.startToEnd,
-          onDismissed: (direction) {
-            vm.deleteTransaction(e);
-            Scaffold.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Transaktion gelöscht'),
-                action: SnackBarAction(
-                  label: 'UNDO',
-                  onPressed: vm.undoLastDeleteTransaction,
-                ),
+    return !vm.deleteTransactionsEnabled
+        ? Dismissible(
+            child: _buildTransaction(e, context),
+            dismissThresholds: {DismissDirection.startToEnd: 0.5},
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(left: 10.0),
+              child: Icon(
+                Icons.delete,
+                color: Colors.white,
               ),
-            );
-          }),
-    );
+            ),
+            key: ObjectKey(e),
+            direction: vm.deleteTransactionsEnabled
+                ? DismissDirection.startToEnd
+                : null,
+            onDismissed: (direction) {
+              vm.deleteTransaction(e);
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Transaktion gelöscht'),
+                  action: SnackBarAction(
+                    label: 'UNDO',
+                    onPressed: vm.undoLastDeleteTransaction,
+                  ),
+                ),
+              );
+            })
+        : Container(
+            child: _buildTransaction(e, context),
+          );
   }
 
   Widget _buildGlobalInputs(BuildContext context, EditTransactionModel e) {
