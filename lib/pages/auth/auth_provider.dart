@@ -124,9 +124,9 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> fingerprintLoginAvailable() {
+  Future<bool> fingerprintLoginActivated() {
     return SharedPreferences.getInstance()
-        .then((sp) => sp.getBool(_fingerPrintEnabledSPKey));
+        .then((sp) => sp.getBool(_fingerPrintEnabledSPKey) ?? false);
   }
 
   void deactivateFingerprint() {

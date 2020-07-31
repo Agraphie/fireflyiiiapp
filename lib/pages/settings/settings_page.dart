@@ -26,7 +26,7 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _authProvider = Provider.of<AuthProvider>(context, listen: false);
-    _authProvider.fingerprintLoginAvailable().then((value) {
+    _authProvider.fingerprintLoginActivated().then((value) {
       setState(() {
         _fingerprintEnabled = value;
         _fingerprintChangeEnabled = true;

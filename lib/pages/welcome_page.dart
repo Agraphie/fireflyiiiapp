@@ -40,7 +40,7 @@ class WelcomePage extends StatelessWidget {
                 height: 20,
               ),
               FutureBuilder<bool>(
-                future: authProvider.fingerprintLoginAvailable(),
+                future: authProvider.fingerprintLoginActivated(),
                 builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
                   if (snapshot.hasError ||
                       !snapshot.hasData ||
