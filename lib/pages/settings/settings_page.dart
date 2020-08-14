@@ -53,13 +53,13 @@ class _SettingsPageState extends State<SettingsPage> {
             SettingsTile.switchTile(
               enabled: _fingerprintChangeEnabled,
               title: 'Use fingerprint',
-              leading: Icon(Icons.fingerprint),
+              leading: const Icon(Icons.fingerprint),
               switchValue: _fingerprintEnabled,
               onToggle: _handleFingerprintChange,
             ),
             SettingsTile.switchTile(
               title: 'Lock app in background',
-              leading: Icon(Icons.phonelink_lock),
+              leading: const Icon(Icons.phonelink_lock),
               switchValue: false,
               onToggle: (bool value) {},
             ),
@@ -70,7 +70,7 @@ class _SettingsPageState extends State<SettingsPage> {
           tiles: [
             SettingsTile(
               title: 'Logout',
-              leading: Icon(Icons.exit_to_app),
+              leading: const Icon(Icons.exit_to_app),
               onTap: _authProvider.logout,
             ),
           ],

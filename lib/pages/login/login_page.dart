@@ -164,7 +164,7 @@ class LoginPage extends StatelessWidget {
     return ProgressButton(
       child: Text(
         title,
-        style: TextStyle(fontSize: 20, color: Colors.white),
+        style: const TextStyle(fontSize: 20, color: Colors.white),
       ),
       onPressed: () => submitAction(),
       buttonState: btnState,

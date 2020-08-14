@@ -15,31 +15,33 @@ class EditTransactionPage extends StatelessWidget {
     routeName,
     (BuildContext c) {
       var e = EditTransactionViewModel();
+      Locale myLocale = Localizations.localeOf(c);
+      var dateFormat = DateFormat.yMd(myLocale.toString());
       return ChangeNotifierProvider<EditTransactionViewModel>(
         create: (c) => e,
-        child: EditTransactionPage(e),
+        child: EditTransactionPage(e, dateFormat),
       );
     },
   );
-  DateFormat _dateFormat;
 
+  final DateFormat _dateFormat;
   final EditTransactionViewModel vm;
 
-  EditTransactionPage(this.vm);
+  EditTransactionPage(this.vm, this._dateFormat);
 
   @override
   Widget build(BuildContext context) {
-    Locale myLocale = Localizations.localeOf(context);
-    _dateFormat = DateFormat.yMd(myLocale.toString());
     return Scaffold(
       backgroundColor: application.neutralBackground,
       appBar: AppBar(
-        actions: <Widget>[IconButton(icon: Icon(Icons.save), onPressed: () {})],
+        actions: <Widget>[
+          IconButton(icon: const Icon(Icons.save), onPressed: () {})
+        ],
       ),
       floatingActionButton: FloatingActionButton(
           onPressed: vm.addNewTransaction,
           tooltip: 'Add transaction split',
-          child: Icon(Icons.add)),
+          child: const Icon(Icons.add)),
       body: StreamBuilder<EditTransactionModel>(
           stream: vm.transactionStream,
           builder: (context, transactionSnap) {
@@ -84,7 +86,7 @@ class EditTransactionPage extends StatelessWidget {
               color: Colors.red,
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.only(left: 10.0),
-              child: Icon(
+              child: const Icon(
                 Icons.delete,
                 color: Colors.white,
               ),
@@ -160,7 +162,7 @@ class EditTransactionPage extends StatelessWidget {
               child: Container(
                 color: Theme.of(c).accentColor,
                 child: IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.attach_file,
                     color: Colors.white,
                   ),
@@ -175,12 +177,12 @@ class EditTransactionPage extends StatelessWidget {
               ? const SizedBox()
               : const Padding(
                   padding: EdgeInsets.all(6.0),
-                  child: Text("Keine Anhänge"),
+                  child: Text('Keine Anhänge'),
                 ),
           ...e.attachments.map((File item) {
             return Chip(
               label: Text(item.uri.path.split('/').last),
-              deleteIcon: Icon(Icons.clear),
+              deleteIcon: const Icon(Icons.clear),
               deleteIconColor: Colors.white,
               onDeleted: () => vm.removeFile(item),
             );
@@ -249,7 +251,7 @@ class EditTransactionPage extends StatelessWidget {
               ...item.tags?.map(
                 (t) => Chip(
                   label: Text(t),
-                  deleteIcon: Icon(Icons.clear),
+                  deleteIcon: const Icon(Icons.clear),
                   deleteIconColor: Colors.white,
                   onDeleted: () => vm.removeTag(t, item),
                 ),

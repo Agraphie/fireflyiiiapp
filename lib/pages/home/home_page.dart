@@ -13,7 +13,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         actions: <Widget>[
           IconButton(
-              icon: Icon(Icons.settings),
+              icon: const Icon(Icons.settings),
               onPressed: () =>
                   Navigator.pushNamed(context, SettingsPage.routeUri))
         ],
@@ -21,7 +21,7 @@ class HomePage extends StatelessWidget {
       body: const Center(),
       floatingActionButton: FloatingActionButton(
         tooltip: 'New transaction',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         onPressed: () => Navigator.pushNamed(
             context, EditTransactionPage.routeName,
             arguments: EditTransactionPageArguments()),

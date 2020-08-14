@@ -23,10 +23,10 @@ class WelcomePage extends StatelessWidget {
                     blurRadius: 5,
                     spreadRadius: 2)
               ],
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [const Color(0xff3c8dbc), const Color(0xff3c8dbc)])),
+                  colors: [Color(0xff3c8dbc), Color(0xff3c8dbc)])),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -99,11 +99,11 @@ class WelcomePage extends StatelessWidget {
               const SizedBox(
                 height: 20,
               ),
-              Icon(Icons.fingerprint, size: 90, color: Colors.white),
+              const Icon(Icons.fingerprint, size: 90, color: Colors.white),
               const SizedBox(
                 height: 20,
               ),
-              Text(
+              const Text(
                 'Touch ID',
                 style: TextStyle(
                   color: Colors.white,
@@ -121,7 +121,7 @@ class WelcomePage extends StatelessWidget {
   }
 
   Widget _title() {
-    return Text('Firefly III',
+    return const Text('Firefly III',
         style: TextStyle(
           fontSize: 30,
           fontWeight: FontWeight.w700,
