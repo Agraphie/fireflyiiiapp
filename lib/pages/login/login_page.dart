@@ -1,7 +1,6 @@
 import 'package:fireflyapp/application.dart';
 import 'package:fireflyapp/pages/login/login_model.dart';
 import 'package:fireflyapp/pages/login/login_view_model.dart';
-import 'package:fireflyapp/widget/bezierContainer.dart';
 import 'package:fireflyapp/widget/progress_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,51 +20,44 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     LoginViewModel loginViewModel =
         Provider.of<LoginViewModel>(context, listen: false);
-    return Stack(
-      children: <Widget>[
-        Scaffold(
-            appBar: AppBar(
-              elevation: 0,
-              iconTheme: const IconThemeData(color: Colors.black),
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    return Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.black),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.only(top: 40, left: 20, right: 20),
+            //  height: MediaQuery.of(context).size.height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _title(context),
+                const SizedBox(
+                  height: 40,
+                ),
+                _baseUrlInputField(loginViewModel),
+                const SizedBox(height: 10),
+                _secretInputField(loginViewModel),
+                const SizedBox(height: 10),
+                _identifierInputField(loginViewModel),
+                const SizedBox(
+                  height: 40,
+                ),
+                _submitButton(context, loginViewModel),
+                Application.isDebugMode
+                    ? Container(
+                        child:
+                            _loginWithMockDataButton(context, loginViewModel),
+                        padding: const EdgeInsets.only(top: 20),
+                      )
+                    : Container()
+              ],
             ),
-            body: Container(
-              padding: const EdgeInsets.only(left: 20, right: 20),
-              height: MediaQuery.of(context).size.height,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  _title(context),
-                  const SizedBox(
-                    height: 40,
-                  ),
-                  _baseUrlInputField(loginViewModel),
-                  const SizedBox(height: 10),
-                  _secretInputField(loginViewModel),
-                  const SizedBox(height: 10),
-                  _identifierInputField(loginViewModel),
-                  const SizedBox(
-                    height: 40,
-                  ),
-                  _submitButton(context, loginViewModel),
-                  Application.isDebugMode
-                      ? Container(
-                          child:
-                              _loginWithMockDataButton(context, loginViewModel),
-                          padding: const EdgeInsets.only(top: 20),
-                        )
-                      : Container()
-                ],
-              ),
-            )),
-        Positioned(
-          top: -MediaQuery.of(context).size.height * .15,
-          right: -MediaQuery.of(context).size.width * .4,
-          child: const BezierContainer(),
-        )
-      ],
-    );
+          ),
+        ));
   }
 
   Widget _baseUrlInputField(LoginViewModel loginViewModel) {
