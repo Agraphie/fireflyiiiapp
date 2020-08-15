@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'account.freezed.dart';
-
 part 'account.g.dart';
 
 @freezed
@@ -9,7 +8,10 @@ abstract class Account implements _$Account {
   const Account._();
 
   const factory Account(AccountType type, String name,
-      {String iban, String id}) = _Account;
+      {String iban,
+      String id,
+      @JsonKey(name: 'currency_symbol') String currencySymbol,
+      @JsonKey(name: 'current_balance') String currentBalance}) = _Account;
 
   factory Account.fromJson(Map<String, dynamic> json) =>
       _$AccountFromJson(json);

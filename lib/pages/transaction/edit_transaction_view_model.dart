@@ -1,11 +1,17 @@
 import 'dart:io';
 
+import 'package:fireflyapp/data/src/account/account_repository.dart';
+import 'package:fireflyapp/domain/account/account.dart';
+import 'package:fireflyapp/pages/auth/auth_provider.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 class EditTransactionViewModel with ChangeNotifier {
   final EditTransactionModel _editTransactionModel = EditTransactionModel();
+
+  AccountRepository _accountRepository;
 
   Stream<List<EditTransactionModelTransaction>> get splitTransactionsStream =>
       _editTransactionModel.transactionsSubject.stream;
@@ -17,6 +23,7 @@ class EditTransactionViewModel with ChangeNotifier {
 
   List<String> tags = ['Käse', 'Wurst'];
   List<String> categories = ['Food', 'Car'];
+  List<Account> assetAccounts = [];
 
   bool get deleteTransactionsEnabled =>
       _editTransactionModel.transactions.length >= 2;
@@ -45,7 +52,14 @@ class EditTransactionViewModel with ChangeNotifier {
   void updateAmount(String c, EditTransactionModelTransaction e) =>
       _editTransactionModel.updateCategory(c, e);
 
-  EditTransactionViewModel() {
+  EditTransactionViewModel(BuildContext context) {
+    AuthProvider a = Provider.of<AuthProvider>(context, listen: false);
+    _accountRepository = AccountRepository(a.authedClient);
+    _accountRepository
+        .loadAccountsWithType(AccountType.asset)
+        .listen((accounts) {
+      assetAccounts = accounts;
+    });
     _editTransactionModelSubject =
         BehaviorSubject.seeded(_editTransactionModel);
     _editTransactionModel.transactionsSubject

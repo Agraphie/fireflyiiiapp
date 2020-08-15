@@ -1,5 +1,6 @@
 import 'package:chopper/chopper.dart';
 import 'package:fireflyapp/domain/account/account.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'api/account_service.dart';
@@ -32,8 +33,15 @@ class AccountRepository implements AccountUseCase {
 
   @override
   Stream<List<Account>> loadAccountsWithType(AccountType accountType) {
-    // TODO: implement loadAccountsWithType
-    throw UnimplementedError();
+    return _accountService
+        .getAccountsForType(describeEnum(accountType))
+        .then((a) => a.body)
+        .then((a) => a.data)
+        .asStream()
+        .flatMap((a) => Stream.fromIterable(a))
+        .map((b) => b.attributes.copyWith(id: b.id))
+        .toList()
+        .asStream();
   }
 
   @override

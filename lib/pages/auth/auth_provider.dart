@@ -23,7 +23,7 @@ class AuthProvider with ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
 
   AuthProvider() {
-    Future<Uri> loadFromSp = loadFromSharedPreferences()
+    Future<Uri> loadFromSp = _loadFromSharedPreferences()
       ..then((_) {
         SharedPreferences.getInstance().then((sp) {
           String savedCredentials = sp.get(_credentialsKey) as String;
@@ -37,7 +37,7 @@ class AuthProvider with ChangeNotifier {
     _baseUri = Future.value(loadFromSp);
   }
 
-  Future<Uri> loadFromSharedPreferences() {
+  Future<Uri> _loadFromSharedPreferences() {
     return SharedPreferences.getInstance().then((sp) {
       String baseUri = sp.get(_baseUriKey) as String;
       if (baseUri != null && baseUri.isNotEmpty) {
@@ -104,6 +104,7 @@ class AuthProvider with ChangeNotifier {
   void _saveBaseUri(Uri uri) {
     SharedPreferences.getInstance().then(
         (SharedPreferences sp) => sp.setString(_baseUriKey, uri.toString()));
+    _baseUri = Future.value(uri);
   }
 
   Future<Uri> getBaseUri() {

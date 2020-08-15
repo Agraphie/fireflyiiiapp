@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fireflyapp/application.dart' as application;
+import 'package:fireflyapp/domain/account/account.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_model.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_view_model.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,7 @@ class EditTransactionPage extends StatelessWidget {
   static final MapEntry<String, WidgetBuilder> route = MapEntry(
     routeName,
     (BuildContext c) {
-      var e = EditTransactionViewModel();
+      var e = EditTransactionViewModel(c);
       Locale myLocale = Localizations.localeOf(c);
       var dateFormat = DateFormat.yMd(myLocale.toString());
       return ChangeNotifierProvider<EditTransactionViewModel>(
@@ -116,9 +117,7 @@ class EditTransactionPage extends StatelessWidget {
     return _buildCard(
       Column(
         children: <Widget>[
-          const TextField(
-            decoration: InputDecoration(labelText: 'From'),
-          ),
+          _buildFromAccount(),
           const SizedBox(
             height: 10,
           ),
@@ -145,6 +144,23 @@ class EditTransactionPage extends StatelessWidget {
           _buildAttachmentSelectField(context, e),
         ],
       ),
+    );
+  }
+
+  Widget _buildFromAccount() {
+    TextEditingController t = TextEditingController()..text = '';
+    return TypeAheadField(
+      autoFlipDirection: true,
+      textFieldConfiguration: TextFieldConfiguration<Account>(
+          decoration: const InputDecoration(labelText: 'From'), controller: t),
+      suggestionsCallback: (pattern) {
+        return vm.assetAccounts
+            .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()));
+      },
+      itemBuilder: (context, Account suggestion) {
+        return ListTile(title: Text(suggestion.name));
+      },
+      onSuggestionSelected: (Account suggestion) {},
     );
   }
 

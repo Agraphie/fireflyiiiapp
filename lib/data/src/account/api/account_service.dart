@@ -8,6 +8,10 @@ abstract class AccountService extends ChopperService {
   static AccountService create([ChopperClient client]) =>
       _$AccountService(client);
 
-  @Get(path: '?type=asset')
+  @Get(path: '')
   Future<Response<AccountArray>> getAllAccounts();
+
+  @Get()
+  Future<Response<AccountArray>> getAccountsForType(
+      @Query('type') String accountType);
 }
