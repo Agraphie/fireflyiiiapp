@@ -1,12 +1,14 @@
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:fireflyapp/domain/account/account.dart';
 import 'package:rxdart/rxdart.dart';
 
 class EditTransactionModel {
   DateTime transactionDate;
-  String fromAccount;
-  String toAccount;
+  Account _fromAccount;
+  Account _toAccount;
+
   Set<File> attachments = HashSet(hashCode: (f) {
     return f.path.hashCode;
   }, equals: (k1, k2) {
@@ -76,6 +78,14 @@ class EditTransactionModel {
 
   void removeFile(File item) {
     attachments.remove(item);
+  }
+
+  Account get fromAccount => _fromAccount;
+
+  Account get toAccount => _toAccount;
+
+  void updateFromAccount(Account a) {
+    _fromAccount = a;
   }
 }
 

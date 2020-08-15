@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class EditTransactionPage extends StatelessWidget {
+  static const int assetAccountsSuggestionTotal = 5;
   static const String routeName = '/transaction/';
   static final MapEntry<String, WidgetBuilder> route = MapEntry(
     routeName,
@@ -117,7 +118,7 @@ class EditTransactionPage extends StatelessWidget {
     return _buildCard(
       Column(
         children: <Widget>[
-          _buildFromAccount(),
+          _buildFromAccount(e),
           const SizedBox(
             height: 10,
           ),
@@ -147,20 +148,25 @@ class EditTransactionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFromAccount() {
-    TextEditingController t = TextEditingController()..text = '';
+  Widget _buildFromAccount(EditTransactionModel e) {
+    TextEditingController t = TextEditingController()
+      ..text = e.fromAccount != null ? e.fromAccount.name : '';
     return TypeAheadField(
       autoFlipDirection: true,
       textFieldConfiguration: TextFieldConfiguration<Account>(
           decoration: const InputDecoration(labelText: 'From'), controller: t),
       suggestionsCallback: (pattern) {
         return vm.assetAccounts
-            .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()));
+            .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()))
+            .take(assetAccountsSuggestionTotal);
       },
       itemBuilder: (context, Account suggestion) {
         return ListTile(title: Text(suggestion.name));
       },
-      onSuggestionSelected: (Account suggestion) {},
+      onSuggestionSelected: (Account selection) {
+        vm.updateFromAccount(selection);
+        t.clear();
+      },
     );
   }
 

@@ -52,6 +52,11 @@ class EditTransactionViewModel with ChangeNotifier {
   void updateAmount(String c, EditTransactionModelTransaction e) =>
       _editTransactionModel.updateCategory(c, e);
 
+  void updateFromAccount(Account a) {
+    _editTransactionModel.updateFromAccount(a);
+    _editTransactionModelSubject.add(_editTransactionModel);
+  }
+
   EditTransactionViewModel(BuildContext context) {
     AuthProvider a = Provider.of<AuthProvider>(context, listen: false);
     _accountRepository = AccountRepository(a.authedClient);
