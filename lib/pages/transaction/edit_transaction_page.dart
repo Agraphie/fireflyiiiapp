@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class EditTransactionPage extends StatelessWidget {
-  static const int assetAccountsSuggestionTotal = 5;
+  static const int accountsSuggestionTotal = 5;
   static const String routeName = '/transaction/';
   static final MapEntry<String, WidgetBuilder> route = MapEntry(
     routeName,
@@ -122,9 +122,7 @@ class EditTransactionPage extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          const TextField(
-            decoration: InputDecoration(labelText: 'To'),
-          ),
+          _buildToAccount(e),
           const SizedBox(
             height: 10,
           ),
@@ -156,15 +154,37 @@ class EditTransactionPage extends StatelessWidget {
       textFieldConfiguration: TextFieldConfiguration<Account>(
           decoration: const InputDecoration(labelText: 'From'), controller: t),
       suggestionsCallback: (pattern) {
-        return vm.assetAccounts
+        return vm.allAccounts
             .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()))
-            .take(assetAccountsSuggestionTotal);
+            .take(accountsSuggestionTotal);
       },
       itemBuilder: (context, Account suggestion) {
         return ListTile(title: Text(suggestion.name));
       },
       onSuggestionSelected: (Account selection) {
         vm.updateFromAccount(selection);
+        t.clear();
+      },
+    );
+  }
+
+  Widget _buildToAccount(EditTransactionModel e) {
+    TextEditingController t = TextEditingController()
+      ..text = e.toAccount != null ? e.toAccount.name : '';
+    return TypeAheadField(
+      autoFlipDirection: true,
+      textFieldConfiguration: TextFieldConfiguration<Account>(
+          decoration: const InputDecoration(labelText: 'To'), controller: t),
+      suggestionsCallback: (pattern) {
+        return vm.allAccounts
+            .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()))
+            .take(accountsSuggestionTotal);
+      },
+      itemBuilder: (context, Account suggestion) {
+        return ListTile(title: Text(suggestion.name));
+      },
+      onSuggestionSelected: (Account selection) {
+        vm.updateToAccount(selection);
         t.clear();
       },
     );
@@ -188,9 +208,7 @@ class EditTransactionPage extends StatelessWidget {
                     Icons.attach_file,
                     color: Colors.white,
                   ),
-                  onPressed: () {
-                    FilePicker.getMultiFile().then(vm.addFiles);
-                  },
+                  onPressed: selectFiles,
                 ),
               ),
             ),
@@ -212,6 +230,15 @@ class EditTransactionPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void selectFiles() {
+    FilePicker.platform.pickFiles(allowMultiple: true).then((result) {
+      if (result != null) {
+        List<File> files = result.paths.map((path) => File(path)).toList();
+        vm.addFiles(files);
+      }
+    });
   }
 
   Widget _buildTransaction(

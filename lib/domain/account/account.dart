@@ -36,8 +36,14 @@ enum AccountType {
   liability,
   @JsonValue('liabilities')
   liabilities,
+  @JsonValue('loan')
+  loan,
   @JsonValue('initial-balance')
   initialBalance,
+  @JsonValue('mortgage')
+  mortgage,
+  @JsonValue('debt')
+  debt,
   @JsonValue('reconciliation')
   reconciliation
 }
@@ -45,7 +51,7 @@ enum AccountType {
 abstract class AccountUseCase {
   Stream<List<Account>> loadAllAccounts();
 
-  Stream<List<Account>> loadAccountsWithType(AccountType accountType);
+  Stream<List<Account>> loadAccountsWithType(List<AccountType> accountType);
 
   Stream<Account> createAccount(Account account);
 

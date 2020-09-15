@@ -13,5 +13,5 @@ abstract class AccountService extends ChopperService {
 
   @Get()
   Future<Response<AccountArray>> getAccountsForType(
-      @Query('type') String accountType);
+      @Query('types') List<String> accountTypes);
 }

@@ -32,9 +32,10 @@ class AccountRepository implements AccountUseCase {
   }
 
   @override
-  Stream<List<Account>> loadAccountsWithType(AccountType accountType) {
+  Stream<List<Account>> loadAccountsWithType(List<AccountType> accountType) {
+    List<String> types = accountType.map(describeEnum).toList();
     return _accountService
-        .getAccountsForType(describeEnum(accountType))
+        .getAccountsForType(types)
         .then((a) => a.body)
         .then((a) => a.data)
         .asStream()

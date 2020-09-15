@@ -87,6 +87,10 @@ class EditTransactionModel {
   void updateFromAccount(Account a) {
     _fromAccount = a;
   }
+
+  void updateToAccount(Account a) {
+    _toAccount = a;
+  }
 }
 
 class EditTransactionModelTransaction {

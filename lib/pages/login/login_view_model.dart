@@ -96,6 +96,7 @@ class LoginViewModel with ChangeNotifier, WidgetsBindingObserver {
     _baseUri
         .where((s) => s.isNotEmpty)
         .debounceTime(defaultDebounceDuration)
+        .map((url) => url.trim())
         .listen((s) {
       if (_loginModel.baseUriValid) {
         _loginModel.baseUri = Uri.parse(s);

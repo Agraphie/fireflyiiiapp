@@ -23,7 +23,23 @@ class EditTransactionViewModel with ChangeNotifier {
 
   List<String> tags = ['Käse', 'Wurst'];
   List<String> categories = ['Food', 'Car'];
-  List<Account> assetAccounts = [];
+  List<Account> allAccounts = [];
+
+  final Set<AccountType> _validFromAccountTypes = {
+    AccountType.asset,
+    AccountType.revenue,
+    AccountType.loan,
+    AccountType.debt,
+    AccountType.mortgage
+  }
+
+  final Set<AccountType> _validToAccountTypes = {
+    AccountType.asset,
+    AccountType.expense,
+    AccountType.loan,
+    AccountType.debt,
+    AccountType.mortgage
+  }
 
   bool get deleteTransactionsEnabled =>
       _editTransactionModel.transactions.length >= 2;
@@ -36,8 +52,8 @@ class EditTransactionViewModel with ChangeNotifier {
   void undoLastDeleteTransaction() =>
       _editTransactionModel.undoLastDeleteTransaction();
 
-  void updateDescription(
-          String description, EditTransactionModelTransaction e) =>
+  void updateDescription(String description,
+      EditTransactionModelTransaction e) =>
       _editTransactionModel.updateDescription(description, e);
 
   void addTag(String tag, EditTransactionModelTransaction e) =>
@@ -57,13 +73,27 @@ class EditTransactionViewModel with ChangeNotifier {
     _editTransactionModelSubject.add(_editTransactionModel);
   }
 
+  void updateToAccount(Account a) {
+    _editTransactionModel.updateToAccount(a);
+    _editTransactionModelSubject.add(_editTransactionModel);
+  }
+
+  Iterable<Account> fromAccounts() {
+    return allAccounts.where((a) => _validFromAccountTypes.contains(a.type));
+  }
+
+
   EditTransactionViewModel(BuildContext context) {
     AuthProvider a = Provider.of<AuthProvider>(context, listen: false);
     _accountRepository = AccountRepository(a.authedClient);
-    _accountRepository
-        .loadAccountsWithType(AccountType.asset)
-        .listen((accounts) {
-      assetAccounts = accounts;
+    _accountRepository.loadAccountsWithType([
+      AccountType.asset,
+      AccountType.revenue,
+      AccountType.loan,
+      AccountType.debt,
+      AccountType.mortgage
+    ]).listen((accounts) {
+      return allAccounts = accounts;
     });
     _editTransactionModelSubject =
         BehaviorSubject.seeded(_editTransactionModel);
