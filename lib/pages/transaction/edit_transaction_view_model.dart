@@ -31,7 +31,7 @@ class EditTransactionViewModel with ChangeNotifier {
     AccountType.loan,
     AccountType.debt,
     AccountType.mortgage
-  }
+  };
 
   final Set<AccountType> _validToAccountTypes = {
     AccountType.asset,
@@ -39,7 +39,7 @@ class EditTransactionViewModel with ChangeNotifier {
     AccountType.loan,
     AccountType.debt,
     AccountType.mortgage
-  }
+  };
 
   bool get deleteTransactionsEnabled =>
       _editTransactionModel.transactions.length >= 2;
@@ -82,6 +82,9 @@ class EditTransactionViewModel with ChangeNotifier {
     return allAccounts.where((a) => _validFromAccountTypes.contains(a.type));
   }
 
+  Iterable<Account> toAccounts() {
+    return allAccounts.where((a) => _validToAccountTypes.contains(a.type));
+  }
 
   EditTransactionViewModel(BuildContext context) {
     AuthProvider a = Provider.of<AuthProvider>(context, listen: false);

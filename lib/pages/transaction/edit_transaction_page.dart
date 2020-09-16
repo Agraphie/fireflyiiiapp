@@ -154,7 +154,7 @@ class EditTransactionPage extends StatelessWidget {
       textFieldConfiguration: TextFieldConfiguration<Account>(
           decoration: const InputDecoration(labelText: 'From'), controller: t),
       suggestionsCallback: (pattern) {
-        return vm.allAccounts
+        return vm.fromAccounts()
             .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()))
             .take(accountsSuggestionTotal);
       },
@@ -176,7 +176,7 @@ class EditTransactionPage extends StatelessWidget {
       textFieldConfiguration: TextFieldConfiguration<Account>(
           decoration: const InputDecoration(labelText: 'To'), controller: t),
       suggestionsCallback: (pattern) {
-        return vm.allAccounts
+        return vm.toAccounts()
             .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()))
             .take(accountsSuggestionTotal);
       },
