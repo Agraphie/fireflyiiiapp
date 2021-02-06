@@ -71,7 +71,7 @@ class _SettingsPageState extends State<SettingsPage> {
             SettingsTile(
               title: 'Logout',
               leading: const Icon(Icons.exit_to_app),
-              onTap: () {
+              onPressed: (_) {
                 Navigator.pop(context);
                 _authProvider.logout();
               },

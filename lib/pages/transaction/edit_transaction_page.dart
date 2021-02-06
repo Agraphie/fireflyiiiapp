@@ -151,10 +151,11 @@ class EditTransactionPage extends StatelessWidget {
       ..text = e.fromAccount != null ? e.fromAccount.name : '';
     return TypeAheadField(
       autoFlipDirection: true,
-      textFieldConfiguration: TextFieldConfiguration<Account>(
+      textFieldConfiguration: TextFieldConfiguration(
           decoration: const InputDecoration(labelText: 'From'), controller: t),
       suggestionsCallback: (pattern) {
-        return vm.fromAccounts()
+        return vm
+            .fromAccounts()
             .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()))
             .take(accountsSuggestionTotal);
       },
@@ -173,10 +174,11 @@ class EditTransactionPage extends StatelessWidget {
       ..text = e.toAccount != null ? e.toAccount.name : '';
     return TypeAheadField(
       autoFlipDirection: true,
-      textFieldConfiguration: TextFieldConfiguration<Account>(
+      textFieldConfiguration: TextFieldConfiguration(
           decoration: const InputDecoration(labelText: 'To'), controller: t),
       suggestionsCallback: (pattern) {
-        return vm.toAccounts()
+        return vm
+            .toAccounts()
             .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()))
             .take(accountsSuggestionTotal);
       },
@@ -269,7 +271,7 @@ class EditTransactionPage extends StatelessWidget {
       ..text = item.category ?? '';
     return TypeAheadField(
       autoFlipDirection: true,
-      textFieldConfiguration: TextFieldConfiguration<String>(
+      textFieldConfiguration: TextFieldConfiguration(
           decoration: const InputDecoration(labelText: 'Kategorie'),
           controller: t),
       suggestionsCallback: (pattern) {
@@ -310,7 +312,7 @@ class EditTransactionPage extends StatelessWidget {
         ),
         TypeAheadField(
           autoFlipDirection: true,
-          textFieldConfiguration: TextFieldConfiguration<String>(
+          textFieldConfiguration: TextFieldConfiguration(
               decoration: const InputDecoration(labelText: 'Tags'),
               controller: t),
           suggestionsCallback: (pattern) {
