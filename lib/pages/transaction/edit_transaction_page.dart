@@ -80,7 +80,7 @@ class EditTransactionPage extends StatelessWidget {
 
   Widget _buildSingleTransaction(
       EditTransactionModelTransaction e, BuildContext context) {
-    return !vm.deleteTransactionsEnabled
+    return vm.deleteTransactionsEnabled
         ? Dismissible(
             child: _buildTransaction(e, context),
             dismissThresholds: {DismissDirection.startToEnd: 0.5},
