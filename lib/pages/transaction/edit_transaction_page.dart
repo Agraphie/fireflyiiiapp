@@ -37,7 +37,11 @@ class EditTransactionPage extends StatelessWidget {
       backgroundColor: application.neutralBackground,
       appBar: AppBar(
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.save), onPressed: () {})
+          IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: () {
+                vm.saveTransaction();
+              })
         ],
       ),
       floatingActionButton: FloatingActionButton(

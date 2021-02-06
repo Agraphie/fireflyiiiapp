@@ -1,5 +1,6 @@
-import 'package:async/async.dart' show StreamGroup;
 import 'package:chopper/chopper.dart';
+import 'package:fireflyapp/data/src/account/api/account_array.dart';
+import 'package:fireflyapp/data/src/api/dto/pagination.dart';
 import 'package:fireflyapp/domain/account/account.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
@@ -41,23 +42,9 @@ class AccountRepository implements AccountUseCase {
           return a.body;
         })
         .asStream()
-        //Only needed as long as API doesn't support a page size parameter.
-        .flatMap((value) {
-          int pages = value?.meta?.pagination?.totalPages as int ?? 1;
-          if (pages > 1) {
-            return StreamGroup.merge([
-              Stream.value(value),
-              Stream.fromIterable(Iterable<int>.generate(pages + 1))
-                  // Skip the first page and "0" page, as we start the count from 0 but the Firefly API starts from 1
-                  .skip(2)
-                  .flatMap((i) =>
-                      _accountService.getAccountsForType(types, i).asStream())
-                  .map((response) => response.body)
-            ]);
-          } else {
-            return Stream.value(value);
-          }
-        })
+        .flatMap((v) => Pagination.test<AccountArray>(v, (i) {
+              return _accountService.getAccountsForType(types, i);
+            }))
         .map((a) => a.data)
         .flatMap((a) => Stream.fromIterable(a))
         .map((b) => b.attributes.copyWith(id: b.id))

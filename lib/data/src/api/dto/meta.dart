@@ -1,4 +1,4 @@
-import 'package:fireflyapp/data/src/account/api/pagination.dart';
+import 'package:fireflyapp/data/src/api/dto/pagination.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'meta.freezed.dart';
