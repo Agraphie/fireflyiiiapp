@@ -40,7 +40,7 @@ class EditTransactionPage extends StatelessWidget {
           IconButton(
               icon: const Icon(Icons.save),
               onPressed: () {
-                vm.saveTransaction();
+                vm.saveTransactions();
               })
         ],
       ),

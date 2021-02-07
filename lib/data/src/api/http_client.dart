@@ -4,10 +4,12 @@ import 'package:chopper/chopper.dart';
 import 'package:fireflyapp/data/src/account/api/account_array.dart';
 import 'package:fireflyapp/data/src/account/api/account_service.dart';
 import 'package:fireflyapp/data/src/api/http_error_converter.dart';
+import 'package:fireflyapp/data/src/api/http_header_interceptor.dart';
 import 'package:fireflyapp/data/src/api/http_throw_exception_interceptor.dart';
 import 'package:fireflyapp/data/src/api/json_serializable_converter.dart';
 import 'package:fireflyapp/data/src/transaction/api/transaction_array.dart';
 import 'package:fireflyapp/data/src/transaction/api/transaction_service.dart';
+import 'package:fireflyapp/data/src/transaction/api/transaction_single.dart';
 import 'package:oauth2/oauth2.dart' as oauth2;
 
 class FireflyHttpClient {
@@ -67,14 +69,19 @@ class FireflyHttpClient {
       AccountArray: (Map<String, dynamic> jsonData) =>
           AccountArray.fromJson(jsonData),
       TransactionArray: (Map<String, dynamic> jsonData) =>
-          TransactionArray.fromJson(jsonData)
+          TransactionArray.fromJson(jsonData),
+      TransactionSingle: (Map<String, dynamic> jsonData) =>
+          TransactionSingle.fromJson(jsonData),
     });
     return ChopperClient(
       baseUrl: Uri.https('firefly.clemenskeppler.de', '/api/v1').toString(),
       client: _authedClient,
       converter: converter,
       errorConverter: HttpErrorConverter(),
-      interceptors: <ResponseInterceptor>[HttpThrowExceptionInterceptor()],
+      interceptors: [
+        HttpHeaderInterceptor(),
+        HttpThrowExceptionInterceptor(),
+      ],
       services: [AccountService.create(), TransactionService.create()],
     );
   }

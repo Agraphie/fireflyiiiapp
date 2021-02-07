@@ -1,9 +1,7 @@
 import 'dart:io';
 
 import 'package:fireflyapp/data/src/account/account_repository.dart';
-import 'package:fireflyapp/data/src/transaction/transaction_repository.dart';
 import 'package:fireflyapp/domain/account/account.dart';
-import 'package:fireflyapp/domain/transaction/transaction.dart';
 import 'package:fireflyapp/pages/auth/auth_provider.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_model.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +12,6 @@ class EditTransactionViewModel with ChangeNotifier {
   final EditTransactionModel _editTransactionModel = EditTransactionModel();
 
   AccountRepository _accountRepository;
-  TransactionRepository _transactionRepository;
 
   Stream<List<EditTransactionModelTransaction>> get splitTransactionsStream =>
       _editTransactionModel.transactionsSubject.stream;
@@ -92,7 +89,6 @@ class EditTransactionViewModel with ChangeNotifier {
   EditTransactionViewModel(BuildContext context) {
     AuthProvider a = Provider.of<AuthProvider>(context, listen: false);
     _accountRepository = AccountRepository(a.authedClient);
-    _transactionRepository = TransactionRepository(a.authedClient);
     _accountRepository.loadAccountsWithType([
       AccountType.asset,
       AccountType.revenue,
@@ -118,12 +114,19 @@ class EditTransactionViewModel with ChangeNotifier {
     _editTransactionModelSubject.add(_editTransactionModel);
   }
 
-  void saveTransaction() {
-    Transaction.spendMoney(
-        _editTransactionModel.fromAccount,
-        _editTransactionModel.toAccount,
-        1,
-        'description',
-        _transactionRepository);
+  void saveTransactions() {
+    _editTransactionModel.fromAccount
+        .transfer(
+            target: _editTransactionModel.toAccount,
+            date: _editTransactionModel.transactionDate,
+            description: "description",
+            amount: 12,
+            notes: "",
+            accountUseCase: _accountRepository)
+        .doOnData((event) {
+      print(event);
+    }).doOnError((e, _) {
+      print(e);
+    });
   }
 }

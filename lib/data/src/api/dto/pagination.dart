@@ -19,7 +19,7 @@ abstract class Pagination with _$Pagination {
       _$PaginationFromJson(json);
 
   //Only needed as long as API doesn't support a page size parameter.
-  static Stream<S> test<S extends Metable>(
+  static Stream<S> getAllPages<S extends Metable>(
       S value, Future<Response<S>> Function(int) apiCall) {
     int pages = value?.meta?.pagination?.totalPages ?? 1;
 

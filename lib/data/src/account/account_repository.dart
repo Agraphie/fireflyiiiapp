@@ -1,7 +1,9 @@
 import 'package:chopper/chopper.dart';
 import 'package:fireflyapp/data/src/account/api/account_array.dart';
 import 'package:fireflyapp/data/src/api/dto/pagination.dart';
+import 'package:fireflyapp/data/src/transaction/transaction_repository.dart';
 import 'package:fireflyapp/domain/account/account.dart';
+import 'package:fireflyapp/domain/transaction/transaction.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -9,6 +11,7 @@ import 'api/account_service.dart';
 
 class AccountRepository implements AccountUseCase {
   AccountService _accountService;
+  TransactionRepository _transactionRepository;
 
   @override
   Stream<List<Account>> loadAllAccounts() {
@@ -25,6 +28,7 @@ class AccountRepository implements AccountUseCase {
 
   AccountRepository(ChopperClient c) {
     _accountService = c.getService<AccountService>();
+    _transactionRepository = TransactionRepository(c);
   }
 
   @override
@@ -42,7 +46,7 @@ class AccountRepository implements AccountUseCase {
           return a.body;
         })
         .asStream()
-        .flatMap((v) => Pagination.test<AccountArray>(v, (i) {
+        .flatMap((v) => Pagination.getAllPages<AccountArray>(v, (i) {
               return _accountService.getAccountsForType(types, i);
             }))
         .map((a) => a.data)
@@ -56,5 +60,14 @@ class AccountRepository implements AccountUseCase {
   Stream<Account> updateAccount(Account account) {
     // TODO: implement updateAccount
     throw UnimplementedError();
+  }
+
+  @override
+  Stream<Transaction> transfer(Account fromAccount, Account toAccount,
+      double amount, String description, DateTime date, String notes) {
+    Transaction transaction = Transaction.createTransaction(
+        fromAccount, toAccount, amount, description, date, notes);
+
+    return _transactionRepository.save(transaction);
   }
 }

@@ -4,7 +4,7 @@ import 'package:fireflyapp/data/src/transaction/api/transaction_service.dart';
 import 'package:fireflyapp/domain/transaction/transaction.dart';
 import 'package:rxdart/rxdart.dart';
 
-class TransactionRepository implements TransactionUseCase {
+class TransactionRepository {
   TransactionService _transactionService;
 
   TransactionRepository(ChopperClient chopperClient) {
@@ -12,35 +12,25 @@ class TransactionRepository implements TransactionUseCase {
   }
 
   @override
-  Stream<List<Transaction>> loadAllTransactions() {
-    // TODO: implement loadAllTransactions
+  Stream<Transaction> updateTransaction(Transaction transaction) {
+    // TODO: implement updateTransaction
     throw UnimplementedError();
   }
 
-  @override
-  Stream<List<Transaction>> loadTransactionsWithType(
-      List<TransactionType> transactionType) {
-    // TODO: implement loadTransactionsWithType
-    throw UnimplementedError();
-  }
-
-  @override
-  Stream<Transaction> spendMoney(Transaction transaction) {
+  Stream<Transaction> save(Transaction transaction) {
     return _transactionService
         .createTransaction(TransactionDto.fromDomainTransaction(transaction))
         .then((value) {
-          return value.body.data;
+          return value.body;
         })
         .catchError((e) {
           print(e);
         })
         .asStream()
-        .flatMap((a) => Stream.fromIterable(null));
-  }
-
-  @override
-  Stream<Transaction> updateTransaction(Transaction transaction) {
-    // TODO: implement updateTransaction
-    throw UnimplementedError();
+        .map((event) {
+          return event.data;
+        })
+        //    .map((b) => b.attributes.copyWith(id: b.id))
+        .flatMap((transactionDto) => Stream.fromIterable([]));
   }
 }

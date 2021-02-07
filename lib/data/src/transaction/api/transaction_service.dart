@@ -1,6 +1,7 @@
 import 'package:chopper/chopper.dart';
 import 'package:fireflyapp/data/src/transaction/api/transaction_array.dart';
 import 'package:fireflyapp/data/src/transaction/api/transaction_dto.dart';
+import 'package:fireflyapp/data/src/transaction/api/transaction_single.dart';
 
 part 'transaction_service.chopper.dart';
 
@@ -17,6 +18,6 @@ abstract class TransactionService extends ChopperService {
       @Query('types') List<String> transactionTypes, @Query('page') int page);
 
   @Post()
-  Future<Response<TransactionArray>> createTransaction(
+  Future<Response<TransactionSingle>> createTransaction(
       @Body() TransactionDto transaction);
 }

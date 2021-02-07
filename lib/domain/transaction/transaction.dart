@@ -9,6 +9,7 @@ abstract class Transaction implements _$Transaction {
   const Transaction._();
 
   const factory Transaction(
+      String id,
       TransactionType type,
       String title,
       Account fromAccount,
@@ -19,31 +20,22 @@ abstract class Transaction implements _$Transaction {
   factory Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
 
-  Stream<List<Transaction>> loadAllTransactions(TransactionUseCase a) {
-    return a.loadAllTransactions();
-  }
+  static Transaction createTransaction(Account fromAccount, Account toAccount,
+      double amount, String description, DateTime date, String notes) {
+    TransactionType type;
+    if (fromAccount.type == AccountType.asset &&
+        toAccount.type == AccountType.asset) {
+      type = TransactionType.transfer;
+    } else if (fromAccount.type == AccountType.asset &&
+        toAccount.type != AccountType.asset) {
+      type = TransactionType.withdrawal;
+    } else {
+      type = TransactionType.deposit;
+    }
 
-  static Stream<Transaction> spendMoney(
-      Account fromAccount,
-      Account toAccount,
-      double amount,
-      String description,
-      TransactionUseCase transactionUseCase) {
-    Transaction transaction = Transaction(TransactionType.withdrawal,
-        'Test title', fromAccount, toAccount, description, amount);
-    return transactionUseCase.spendMoney(transaction);
+    return Transaction(
+        "1", type, description, fromAccount, toAccount, description, amount);
   }
 }
 
 enum TransactionType { withdrawal, deposit, transfer }
-
-abstract class TransactionUseCase {
-  Stream<List<Transaction>> loadAllTransactions();
-
-  Stream<List<Transaction>> loadTransactionsWithType(
-      List<TransactionType> transactionType);
-
-  Stream<Transaction> spendMoney(Transaction transaction);
-
-  Stream<Transaction> updateTransaction(Transaction transaction);
-}

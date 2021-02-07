@@ -1,3 +1,4 @@
+import 'package:fireflyapp/domain/transaction/transaction.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'account.freezed.dart';
@@ -18,6 +19,17 @@ abstract class Account implements _$Account {
 
   Stream<List<Account>> loadAllAccounts(AccountUseCase a) {
     return a.loadAllAccounts();
+  }
+
+  Stream<Transaction> transfer(
+      {Account target,
+      DateTime date,
+      String description,
+      double amount,
+      String notes,
+      AccountUseCase accountUseCase}) {
+    return accountUseCase.transfer(
+        this, target, amount, description, date, notes);
   }
 }
 
@@ -56,4 +68,7 @@ abstract class AccountUseCase {
   Stream<Account> createAccount(Account account);
 
   Stream<Account> updateAccount(Account account);
+
+  Stream<Transaction> transfer(Account fromAccount, Account toAccount,
+      double amount, String description, DateTime date, String notes);
 }
