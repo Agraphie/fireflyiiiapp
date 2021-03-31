@@ -6,7 +6,6 @@ import 'package:fireflyapp/domain/account/account.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_model.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -103,7 +102,7 @@ class EditTransactionPage extends StatelessWidget {
                 : null,
             onDismissed: (direction) {
               vm.deleteTransaction(e);
-              Scaffold.of(context).showSnackBar(
+              ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text('Transaktion gelöscht'),
                   action: SnackBarAction(
@@ -151,47 +150,57 @@ class EditTransactionPage extends StatelessWidget {
   }
 
   Widget _buildFromAccount(EditTransactionModel e) {
-    TextEditingController t = TextEditingController()
-      ..text = e.fromAccount != null ? e.fromAccount.name : '';
-    return TypeAheadField(
-      autoFlipDirection: true,
-      textFieldConfiguration: TextFieldConfiguration(
-          decoration: const InputDecoration(labelText: 'From'), controller: t),
-      suggestionsCallback: (pattern) {
-        return vm
-            .fromAccounts()
-            .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()))
-            .take(accountsSuggestionTotal);
+    return Autocomplete<Account>(
+      displayStringForOption: (account) => account.name,
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        String typed = textEditingValue.text.trim();
+        if (typed == '') {
+          return const Iterable<Account>.empty();
+        }
+        return vm.fromAccounts().where((Account option) {
+          return option.name.toLowerCase().contains(typed.toLowerCase());
+        });
       },
-      itemBuilder: (context, Account suggestion) {
-        return ListTile(title: Text(suggestion.name));
-      },
-      onSuggestionSelected: (Account selection) {
+      onSelected: (Account selection) {
         vm.updateFromAccount(selection);
-        t.clear();
+      },
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController fieldTextEditingController,
+          FocusNode fieldFocusNode,
+          VoidCallback onFieldSubmitted) {
+        return TextField(
+          controller: fieldTextEditingController,
+          focusNode: fieldFocusNode,
+          decoration: const InputDecoration(labelText: 'From'),
+        );
       },
     );
   }
 
   Widget _buildToAccount(EditTransactionModel e) {
-    TextEditingController t = TextEditingController()
-      ..text = e.toAccount != null ? e.toAccount.name : '';
-    return TypeAheadField(
-      autoFlipDirection: true,
-      textFieldConfiguration: TextFieldConfiguration(
-          decoration: const InputDecoration(labelText: 'To'), controller: t),
-      suggestionsCallback: (pattern) {
-        return vm
-            .toAccounts()
-            .where((t) => t.name.toLowerCase().contains(pattern.toLowerCase()))
-            .take(accountsSuggestionTotal);
+    return Autocomplete<Account>(
+      displayStringForOption: (account) => account.name,
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        String typed = textEditingValue.text.trim();
+        if (typed == '') {
+          return const Iterable<Account>.empty();
+        }
+        return vm.toAccounts().where((Account option) {
+          return option.name.toLowerCase().contains(typed.toLowerCase());
+        });
       },
-      itemBuilder: (context, Account suggestion) {
-        return ListTile(title: Text(suggestion.name));
-      },
-      onSuggestionSelected: (Account selection) {
+      onSelected: (Account selection) {
         vm.updateToAccount(selection);
-        t.clear();
+      },
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController fieldTextEditingController,
+          FocusNode fieldFocusNode,
+          VoidCallback onFieldSubmitted) {
+        return TextField(
+          controller: fieldTextEditingController,
+          focusNode: fieldFocusNode,
+          decoration: const InputDecoration(labelText: 'To'),
+        );
       },
     );
   }
@@ -271,30 +280,34 @@ class EditTransactionPage extends StatelessWidget {
   }
 
   Widget _buildCategoryField(EditTransactionModelTransaction item) {
-    TextEditingController t = TextEditingController()
-      ..text = item.category ?? '';
-    return TypeAheadField(
-      autoFlipDirection: true,
-      textFieldConfiguration: TextFieldConfiguration(
+    return Autocomplete<String>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        String typed = textEditingValue.text.trim();
+        if (typed == '') {
+          return const Iterable<String>.empty();
+        }
+        return vm.categories.where((String option) {
+          return option.toLowerCase().contains(typed.toLowerCase());
+        });
+      },
+      onSelected: (String selection) {
+        vm.updateCategory(selection, item);
+      },
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController fieldTextEditingController,
+          FocusNode fieldFocusNode,
+          VoidCallback onFieldSubmitted) {
+        return TextField(
+          controller: fieldTextEditingController,
+          focusNode: fieldFocusNode,
           decoration: const InputDecoration(labelText: 'Kategorie'),
-          controller: t),
-      suggestionsCallback: (pattern) {
-        return vm.categories
-            .where((t) => t.toLowerCase().contains(pattern.toLowerCase()));
-      },
-      itemBuilder: (context, String suggestion) {
-        return ListTile(title: Text(suggestion));
-      },
-      onSuggestionSelected: (String suggestion) {
-        vm.updateCategory(suggestion, item);
-        t.clear();
+        );
       },
     );
   }
 
   Widget _buildTagsField(
       EditTransactionModelTransaction item, BuildContext context) {
-    TextEditingController t = TextEditingController();
     return Column(
       children: <Widget>[
         Container(
@@ -314,21 +327,28 @@ class EditTransactionPage extends StatelessWidget {
             ],
           ),
         ),
-        TypeAheadField(
-          autoFlipDirection: true,
-          textFieldConfiguration: TextFieldConfiguration(
+        Autocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            String typed = textEditingValue.text.trim();
+            if (typed == '') {
+              return const Iterable<String>.empty();
+            }
+            return vm.tags.where((String option) {
+              return option.contains(typed.toLowerCase());
+            });
+          },
+          onSelected: (String selection) {
+            vm.addTag(selection, item);
+          },
+          fieldViewBuilder: (BuildContext context,
+              TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode,
+              VoidCallback onFieldSubmitted) {
+            return TextField(
+              controller: fieldTextEditingController,
+              focusNode: fieldFocusNode,
               decoration: const InputDecoration(labelText: 'Tags'),
-              controller: t),
-          suggestionsCallback: (pattern) {
-            return vm.tags
-                .where((t) => t.toLowerCase().contains(pattern.toLowerCase()));
-          },
-          itemBuilder: (context, String suggestion) {
-            return ListTile(title: Text(suggestion));
-          },
-          onSuggestionSelected: (String suggestion) {
-            vm.addTag(suggestion, item);
-            t.clear();
+            );
           },
         )
       ],

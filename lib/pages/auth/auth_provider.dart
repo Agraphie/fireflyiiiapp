@@ -141,7 +141,8 @@ class AuthProvider with ChangeNotifier {
   Future<bool> activateFingerprint() {
     var la = LocalAuthentication();
     return la
-        .authenticateWithBiometrics(localizedReason: 'Verify that it is you')
+        .authenticate(
+            localizedReason: 'Verify that it is you', biometricOnly: true)
         .then((success) {
       if (success) {
         SharedPreferences.getInstance().then(
@@ -157,7 +158,8 @@ class AuthProvider with ChangeNotifier {
   Future<bool> attemptFingerprintLogin() {
     var la = LocalAuthentication();
     return la
-        .authenticateWithBiometrics(localizedReason: 'Verify that it is you')
+        .authenticate(
+            localizedReason: 'Verify that it is you', biometricOnly: true)
         .then((success) {
       if (success) {
         successfullyLoggedIn(success);

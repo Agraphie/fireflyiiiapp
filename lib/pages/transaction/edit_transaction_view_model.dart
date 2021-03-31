@@ -121,7 +121,7 @@ class EditTransactionViewModel with ChangeNotifier {
             date: _editTransactionModel.transactionDate,
             description: "description",
             amount: 12,
-            notes: "",
+            notes: '',
             accountUseCase: _accountRepository)
         .doOnData((event) {
       print(event);

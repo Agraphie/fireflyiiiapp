@@ -23,9 +23,6 @@ class TransactionRepository {
         .then((value) {
           return value.body;
         })
-        .catchError((e) {
-          print(e);
-        })
         .asStream()
         .map((event) {
           return event.data;

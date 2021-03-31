@@ -78,7 +78,7 @@ class FireflyHttpClient {
       client: _authedClient,
       converter: converter,
       errorConverter: HttpErrorConverter(),
-      interceptors: [
+      interceptors: <dynamic>[
         HttpHeaderInterceptor(),
         HttpThrowExceptionInterceptor(),
       ],
