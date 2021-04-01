@@ -63,11 +63,7 @@ class AccountRepository implements AccountUseCase {
   }
 
   @override
-  Stream<Transaction> transfer(Account fromAccount, Account toAccount,
-      double amount, String description, DateTime date, String notes) {
-    Transaction transaction = Transaction.createTransaction(
-        fromAccount, toAccount, amount, description, date, notes);
-
+  Stream<Transaction> transfer(Account fromAccount, Transaction transaction) {
     return _transactionRepository.save(transaction);
   }
 }

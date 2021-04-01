@@ -22,14 +22,8 @@ abstract class Account implements _$Account {
   }
 
   Stream<Transaction> transfer(
-      {Account target,
-      DateTime date,
-      String description,
-      double amount,
-      String notes,
-      AccountUseCase accountUseCase}) {
-    return accountUseCase.transfer(
-        this, target, amount, description, date, notes);
+      {Transaction transaction, AccountUseCase accountUseCase}) {
+    return accountUseCase.transfer(this, transaction);
   }
 }
 
@@ -69,6 +63,5 @@ abstract class AccountUseCase {
 
   Stream<Account> updateAccount(Account account);
 
-  Stream<Transaction> transfer(Account fromAccount, Account toAccount,
-      double amount, String description, DateTime date, String notes);
+  Stream<Transaction> transfer(Account fromAccount, Transaction transaction);
 }

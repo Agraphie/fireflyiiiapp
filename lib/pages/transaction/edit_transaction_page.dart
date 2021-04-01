@@ -26,9 +26,9 @@ class EditTransactionPage extends StatelessWidget {
   );
 
   final DateFormat _dateFormat;
-  final EditTransactionViewModel vm;
+  final EditTransactionViewModel _vm;
 
-  EditTransactionPage(this.vm, this._dateFormat);
+  EditTransactionPage(this._vm, this._dateFormat);
 
   @override
   Widget build(BuildContext context) {
@@ -39,16 +39,16 @@ class EditTransactionPage extends StatelessWidget {
           IconButton(
               icon: const Icon(Icons.save),
               onPressed: () {
-                vm.saveTransactions();
+                _vm.saveTransactions();
               })
         ],
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: vm.addNewTransaction,
+          onPressed: _vm.addNewTransaction,
           tooltip: 'Add transaction split',
           child: const Icon(Icons.add)),
       body: StreamBuilder<EditTransactionModel>(
-          stream: vm.transactionStream,
+          stream: _vm.transactionStream,
           builder: (context, transactionSnap) {
             if (!transactionSnap.hasData) {
               return const Center(
@@ -60,8 +60,8 @@ class EditTransactionPage extends StatelessWidget {
               child: ListView(children: <Widget>[
                 _buildGlobalInputs(context, transactionSnap.data),
                 StreamBuilder<Iterable<EditTransactionModelTransaction>>(
-                    initialData: transactionSnap.data.transactions,
-                    stream: vm.splitTransactionsStream,
+                    initialData: transactionSnap.data.transactionplits,
+                    stream: _vm.splitTransactionsStream,
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return Container();
@@ -83,7 +83,7 @@ class EditTransactionPage extends StatelessWidget {
 
   Widget _buildSingleTransaction(
       EditTransactionModelTransaction e, BuildContext context) {
-    return vm.deleteTransactionsEnabled
+    return _vm.deleteTransactionsEnabled
         ? Dismissible(
             child: _buildTransaction(e, context),
             dismissThresholds: {DismissDirection.startToEnd: 0.5},
@@ -97,17 +97,17 @@ class EditTransactionPage extends StatelessWidget {
               ),
             ),
             key: ObjectKey(e),
-            direction: vm.deleteTransactionsEnabled
+            direction: _vm.deleteTransactionsEnabled
                 ? DismissDirection.startToEnd
                 : null,
             onDismissed: (direction) {
-              vm.deleteTransaction(e);
+              _vm.deleteTransaction(e);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text('Transaktion gelöscht'),
                   action: SnackBarAction(
                     label: 'UNDO',
-                    onPressed: vm.undoLastDeleteTransaction,
+                    onPressed: _vm.undoLastDeleteTransaction,
                   ),
                 ),
               );
@@ -130,10 +130,11 @@ class EditTransactionPage extends StatelessWidget {
             height: 10,
           ),
           TextFormField(
-            initialValue: _dateFormat.format(DateTime.now()),
+            initialValue: _dateFormat.format(e.transactionDate),
             keyboardType: TextInputType.datetime,
             decoration: const InputDecoration(labelText: 'Date'),
             readOnly: true,
+            onChanged: _vm.updateTransactionDate,
             onTap: () => showDatePicker(
                 context: context,
                 initialDate: DateTime.now(),
@@ -157,12 +158,12 @@ class EditTransactionPage extends StatelessWidget {
         if (typed == '') {
           return const Iterable<Account>.empty();
         }
-        return vm.fromAccounts().where((Account option) {
+        return _vm.fromAccounts().where((Account option) {
           return option.name.toLowerCase().contains(typed.toLowerCase());
         });
       },
       onSelected: (Account selection) {
-        vm.updateFromAccount(selection);
+        _vm.updateFromAccount(selection);
       },
       fieldViewBuilder: (BuildContext context,
           TextEditingController fieldTextEditingController,
@@ -185,12 +186,12 @@ class EditTransactionPage extends StatelessWidget {
         if (typed == '') {
           return const Iterable<Account>.empty();
         }
-        return vm.toAccounts().where((Account option) {
+        return _vm.toAccounts().where((Account option) {
           return option.name.toLowerCase().contains(typed.toLowerCase());
         });
       },
       onSelected: (Account selection) {
-        vm.updateToAccount(selection);
+        _vm.updateToAccount(selection);
       },
       fieldViewBuilder: (BuildContext context,
           TextEditingController fieldTextEditingController,
@@ -239,7 +240,7 @@ class EditTransactionPage extends StatelessWidget {
               label: Text(item.uri.path.split('/').last),
               deleteIcon: const Icon(Icons.clear),
               deleteIconColor: Colors.white,
-              onDeleted: () => vm.removeFile(item),
+              onDeleted: () => _vm.removeFile(item),
             );
           }),
         ],
@@ -251,7 +252,7 @@ class EditTransactionPage extends StatelessWidget {
     FilePicker.platform.pickFiles(allowMultiple: true).then((result) {
       if (result != null) {
         List<File> files = result.paths.map((path) => File(path)).toList();
-        vm.addFiles(files);
+        _vm.addFiles(files);
       }
     });
   }
@@ -286,12 +287,12 @@ class EditTransactionPage extends StatelessWidget {
         if (typed == '') {
           return const Iterable<String>.empty();
         }
-        return vm.categories.where((String option) {
+        return _vm.categories.where((String option) {
           return option.toLowerCase().contains(typed.toLowerCase());
         });
       },
       onSelected: (String selection) {
-        vm.updateCategory(selection, item);
+        _vm.updateCategory(selection, item);
       },
       fieldViewBuilder: (BuildContext context,
           TextEditingController fieldTextEditingController,
@@ -321,7 +322,7 @@ class EditTransactionPage extends StatelessWidget {
                   label: Text(t),
                   deleteIcon: const Icon(Icons.clear),
                   deleteIconColor: Colors.white,
-                  onDeleted: () => vm.removeTag(t, item),
+                  onDeleted: () => _vm.removeTag(t, item),
                 ),
               )
             ],
@@ -333,12 +334,12 @@ class EditTransactionPage extends StatelessWidget {
             if (typed == '') {
               return const Iterable<String>.empty();
             }
-            return vm.tags.where((String option) {
+            return _vm.tags.where((String option) {
               return option.contains(typed.toLowerCase());
             });
           },
           onSelected: (String selection) {
-            vm.addTag(selection, item);
+            _vm.addTag(selection, item);
           },
           fieldViewBuilder: (BuildContext context,
               TextEditingController fieldTextEditingController,
@@ -358,7 +359,7 @@ class EditTransactionPage extends StatelessWidget {
   Widget _buildDescription(EditTransactionModelTransaction item) {
     return TextFormField(
       decoration: const InputDecoration(labelText: 'Beschreibung'),
-      onChanged: (s) => vm.updateDescription(s, item),
+      onChanged: (s) => _vm.updateDescription(s, item),
       initialValue: item.description,
     );
   }
@@ -368,6 +369,7 @@ class EditTransactionPage extends StatelessWidget {
       keyboardType: TextInputType.number,
       decoration: const InputDecoration(labelText: 'Betrag'),
       initialValue: item.amount != null ? item.amount.toString() : '',
+      onChanged: (amount) => _vm.updateAmount(amount, item),
     );
   }
 

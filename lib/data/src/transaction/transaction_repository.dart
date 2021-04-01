@@ -2,7 +2,6 @@ import 'package:chopper/chopper.dart';
 import 'package:fireflyapp/data/src/transaction/api/transaction_dto.dart';
 import 'package:fireflyapp/data/src/transaction/api/transaction_service.dart';
 import 'package:fireflyapp/domain/transaction/transaction.dart';
-import 'package:rxdart/rxdart.dart';
 
 class TransactionRepository {
   TransactionService _transactionService;
@@ -20,14 +19,15 @@ class TransactionRepository {
   Stream<Transaction> save(Transaction transaction) {
     return _transactionService
         .createTransaction(TransactionDto.fromDomainTransaction(transaction))
-        .then((value) {
-          return value.body;
-        })
         .asStream()
-        .map((event) {
-          return event.data;
-        })
-        //    .map((b) => b.attributes.copyWith(id: b.id))
-        .flatMap((transactionDto) => Stream.fromIterable([]));
+        .map((value) {
+      return value.body;
+    }).map((event) {
+      return event.data;
+    }).map((b) {
+      return b.attributes.copyWith(id: b.id);
+    }).map((event) {
+      return event.toDomainTransaction();
+    });
   }
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fireflyapp/data/src/account/account_repository.dart';
 import 'package:fireflyapp/domain/account/account.dart';
+import 'package:fireflyapp/domain/transaction/transaction.dart';
 import 'package:fireflyapp/pages/auth/auth_provider.dart';
 import 'package:fireflyapp/pages/transaction/edit_transaction_model.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ class EditTransactionViewModel with ChangeNotifier {
   };
 
   bool get deleteTransactionsEnabled =>
-      _editTransactionModel.transactions.length >= 2;
+      _editTransactionModel.transactionplits.length >= 2;
 
   void addNewTransaction() => _editTransactionModel.addTransactionSplit();
 
@@ -65,8 +66,10 @@ class EditTransactionViewModel with ChangeNotifier {
   void updateCategory(String c, EditTransactionModelTransaction e) =>
       _editTransactionModel.updateCategory(c, e);
 
-  void updateAmount(String c, EditTransactionModelTransaction e) =>
-      _editTransactionModel.updateCategory(c, e);
+  void updateAmount(String amount, EditTransactionModelTransaction e) {
+    var parsedAmount = double.parse(amount);
+    _editTransactionModel.updateAmount(parsedAmount, e);
+  }
 
   void updateFromAccount(Account a) {
     _editTransactionModel.updateFromAccount(a);
@@ -76,6 +79,11 @@ class EditTransactionViewModel with ChangeNotifier {
   void updateToAccount(Account a) {
     _editTransactionModel.updateToAccount(a);
     _editTransactionModelSubject.add(_editTransactionModel);
+  }
+
+  void updateTransactionDate(String date) {
+    var parsedDate = DateTime.parse(date);
+    _editTransactionModel.updateTransactionDate(parsedDate);
   }
 
   Iterable<Account> fromAccounts() {
@@ -115,17 +123,24 @@ class EditTransactionViewModel with ChangeNotifier {
   }
 
   void saveTransactions() {
+    Transaction newTransaction = Transaction.createTransaction();
+
+    for (var e in _editTransactionModel.transactionplits) {
+      newTransaction.addSplit(
+          _editTransactionModel.fromAccount,
+          _editTransactionModel.toAccount,
+          e.amount,
+          e.description,
+          _editTransactionModel.transactionDate,
+          '');
+    }
+
     _editTransactionModel.fromAccount
         .transfer(
-            target: _editTransactionModel.toAccount,
-            date: _editTransactionModel.transactionDate,
-            description: "description",
-            amount: 12,
-            notes: '',
-            accountUseCase: _accountRepository)
-        .doOnData((event) {
+            transaction: newTransaction, accountUseCase: _accountRepository)
+        .listen((event) {
       print(event);
-    }).doOnError((e, _) {
+    }, onError: (Object e) {
       print(e);
     });
   }

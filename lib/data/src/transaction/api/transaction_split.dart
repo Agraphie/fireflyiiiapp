@@ -1,6 +1,8 @@
 import 'package:fireflyapp/domain/account/account.dart';
 import 'package:fireflyapp/domain/transaction/transaction.dart'
     as domain_transaction;
+import 'package:fireflyapp/domain/transaction/transaction_split.dart'
+    as domain_transaction_split;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'transaction_split.freezed.dart';
@@ -11,6 +13,7 @@ abstract class TransactionSplit implements _$TransactionSplit {
   const TransactionSplit._();
 
   const factory TransactionSplit(
+      @nullable String id,
       TransactionSplitType type,
       @JsonKey(name: 'description') String title,
       @JsonKey(name: 'source_id') int sourceAccountId,
@@ -23,14 +26,22 @@ abstract class TransactionSplit implements _$TransactionSplit {
   factory TransactionSplit.fromJson(Map<String, dynamic> json) =>
       _$TransactionSplitFromJson(json);
 
-  domain_transaction.Transaction toDomainTransaction() {
-    return domain_transaction.Transaction('1', _toDomainTransactionType(type),
-        title, fromAccount, toAccount, null, double.parse(amount));
+  domain_transaction_split.TransactionSplit toDomainTransactionSplit() {
+    return domain_transaction_split.TransactionSplit(
+        id,
+        _toDomainTransactionType(type),
+        title,
+        fromAccount,
+        toAccount,
+        null,
+        double.parse(amount),
+        date);
   }
 
-  static TransactionSplit fromDomainTransaction(
-      domain_transaction.Transaction transaction) {
+  static TransactionSplit fromDomainTransactionSplit(
+      domain_transaction_split.TransactionSplit transaction) {
     return TransactionSplit(
+        transaction.id,
         _fromDomainTransactionType(transaction.type),
         transaction.title,
         int.parse(transaction.fromAccount.id),
