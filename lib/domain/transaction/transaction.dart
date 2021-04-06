@@ -9,15 +9,14 @@ part 'transaction.g.dart';
 abstract class Transaction implements _$Transaction {
   const Transaction._();
 
-  const factory Transaction(
-          @nullable String id, List<TransactionSplit> transactionSplits) =
-      _Transaction;
+  const factory Transaction(@nullable String id, @nullable String groupTitle,
+      List<TransactionSplit> transactionSplits) = _Transaction;
 
   factory Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
 
-  static Transaction createTransaction({String id}) {
-    return Transaction(id ?? null, []);
+  static Transaction createTransaction({String id, String groupTitle}) {
+    return Transaction(id ?? null, groupTitle, []);
   }
 
   Transaction addSplit(Account fromAccount, Account toAccount, double amount,

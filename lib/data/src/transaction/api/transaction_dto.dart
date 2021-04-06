@@ -12,8 +12,10 @@ part 'transaction_dto.g.dart';
 abstract class TransactionDto implements _$TransactionDto {
   const TransactionDto._();
 
-  const factory TransactionDto(@nullable String id, List<TransactionSplit> transactions) =
-      _TransactionDto;
+  const factory TransactionDto(
+      @nullable String id,
+      @JsonKey(name: 'group_title') @nullable String groupTitle,
+      List<TransactionSplit> transactions) = _TransactionDto;
 
   factory TransactionDto.fromJson(Map<String, dynamic> json) =>
       _$TransactionDtoFromJson(json);
@@ -22,7 +24,7 @@ abstract class TransactionDto implements _$TransactionDto {
     List<domain_transaction_split.TransactionSplit> transactionSplits =
         transactions.map((e) => e.toDomainTransactionSplit()).toList();
 
-    return domain_transaction.Transaction(id, transactionSplits);
+    return domain_transaction.Transaction(id, groupTitle, transactionSplits);
   }
 
   static TransactionDto fromDomainTransaction(
@@ -31,6 +33,6 @@ abstract class TransactionDto implements _$TransactionDto {
         .map(TransactionSplit.fromDomainTransactionSplit)
         .toList();
 
-    return TransactionDto(transaction.id, transactions);
+    return TransactionDto(transaction.id, transaction.groupTitle, transactions);
   }
 }

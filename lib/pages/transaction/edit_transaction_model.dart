@@ -8,6 +8,7 @@ class EditTransactionModel {
   DateTime transactionDate = DateTime.now();
   Account _fromAccount;
   Account _toAccount;
+  String transactionTitle;
 
   Set<File> attachments = HashSet(hashCode: (f) {
     return f.path.hashCode;
@@ -23,7 +24,7 @@ class EditTransactionModel {
     _initListeners();
   }
 
-  Iterable<EditTransactionModelTransaction> get transactionplits =>
+  Iterable<EditTransactionModelTransaction> get transactionSplits =>
       _transactionSplits.values;
 
   void addTransactionSplit() {
@@ -62,7 +63,8 @@ class EditTransactionModel {
   }
 
   void _initListeners() {
-    transactionsSubject = BehaviorSubject.seeded(_transactionSplits.values.toList());
+    transactionsSubject =
+        BehaviorSubject.seeded(_transactionSplits.values.toList());
   }
 
   BehaviorSubject<List<EditTransactionModelTransaction>> transactionsSubject;

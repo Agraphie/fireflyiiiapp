@@ -18,13 +18,17 @@ class EditTransactionViewModel with ChangeNotifier {
       _editTransactionModel.transactionsSubject.stream;
 
   BehaviorSubject<EditTransactionModel> _editTransactionModelSubject;
+  final BehaviorSubject<bool> _showTitle = BehaviorSubject.seeded(false);
 
+  Stream<bool> get showTitle => _showTitle.stream;
   Stream<EditTransactionModel> get transactionStream =>
       _editTransactionModelSubject.stream;
 
   List<String> tags = ['Käse', 'Wurst'];
   List<String> categories = ['Food', 'Car'];
   List<Account> allAccounts = [];
+  Iterable<File> get attachments => _editTransactionModel.attachments;
+  DateTime get transactionDate => _editTransactionModel.transactionDate;
 
   final Set<AccountType> _validFromAccountTypes = {
     AccountType.asset,
@@ -43,12 +47,17 @@ class EditTransactionViewModel with ChangeNotifier {
   };
 
   bool get deleteTransactionsEnabled =>
-      _editTransactionModel.transactionplits.length >= 2;
+      _editTransactionModel.transactionSplits.length >= 2;
 
-  void addNewTransaction() => _editTransactionModel.addTransactionSplit();
+  void addNewTransaction() {
+    _editTransactionModel.addTransactionSplit();
+    _showTitle.add(_editTransactionModel.transactionSplits.length >= 2);
+  }
 
-  void deleteTransaction(EditTransactionModelTransaction e) =>
-      _editTransactionModel.removeTransactionSplit(e);
+  void deleteTransaction(EditTransactionModelTransaction e) {
+    _editTransactionModel.removeTransactionSplit(e);
+    _showTitle.add(_editTransactionModel.transactionSplits.length >= 2);
+  }
 
   void undoLastDeleteTransaction() =>
       _editTransactionModel.undoLastDeleteTransaction();
@@ -84,6 +93,10 @@ class EditTransactionViewModel with ChangeNotifier {
   void updateTransactionDate(String date) {
     var parsedDate = DateTime.parse(date);
     _editTransactionModel.updateTransactionDate(parsedDate);
+  }
+
+  void updateTitle(String title) {
+    _editTransactionModel.transactionTitle = title;
   }
 
   Iterable<Account> fromAccounts() {
@@ -123,9 +136,14 @@ class EditTransactionViewModel with ChangeNotifier {
   }
 
   void saveTransactions() {
-    Transaction newTransaction = Transaction.createTransaction();
+    if (_editTransactionModel.transactionSplits.length == 1) {
+      updateTitle(null);
+    }
 
-    for (var e in _editTransactionModel.transactionplits) {
+    Transaction newTransaction = Transaction.createTransaction(
+        groupTitle: _editTransactionModel.transactionTitle);
+
+    for (var e in _editTransactionModel.transactionSplits) {
       newTransaction.addSplit(
           _editTransactionModel.fromAccount,
           _editTransactionModel.toAccount,
@@ -134,7 +152,7 @@ class EditTransactionViewModel with ChangeNotifier {
           _editTransactionModel.transactionDate,
           '');
     }
-
+    print(newTransaction);
     _editTransactionModel.fromAccount
         .transfer(
             transaction: newTransaction, accountUseCase: _accountRepository)
@@ -143,5 +161,9 @@ class EditTransactionViewModel with ChangeNotifier {
     }, onError: (Object e) {
       print(e);
     });
+  }
+
+  void dispose() {
+    _editTransactionModelSubject.close();
   }
 }

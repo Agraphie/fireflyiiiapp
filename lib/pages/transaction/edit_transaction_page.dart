@@ -58,9 +58,9 @@ class EditTransactionPage extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.all(3.0),
               child: ListView(children: <Widget>[
-                _buildGlobalInputs(context, transactionSnap.data),
+                _buildGlobalInputs(context),
                 StreamBuilder<Iterable<EditTransactionModelTransaction>>(
-                    initialData: transactionSnap.data.transactionplits,
+                    initialData: transactionSnap.data.transactionSplits,
                     stream: _vm.splitTransactionsStream,
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
@@ -117,20 +117,21 @@ class EditTransactionPage extends StatelessWidget {
           );
   }
 
-  Widget _buildGlobalInputs(BuildContext context, EditTransactionModel e) {
+  Widget _buildGlobalInputs(BuildContext context) {
     return _buildCard(
       Column(
         children: <Widget>[
-          _buildFromAccount(e),
+          _buildTransactionTitle(),
+          _buildFromAccount(),
           const SizedBox(
             height: 10,
           ),
-          _buildToAccount(e),
+          _buildToAccount(),
           const SizedBox(
             height: 10,
           ),
           TextFormField(
-            initialValue: _dateFormat.format(e.transactionDate),
+            initialValue: _dateFormat.format(_vm.transactionDate),
             keyboardType: TextInputType.datetime,
             decoration: const InputDecoration(labelText: 'Date'),
             readOnly: true,
@@ -144,13 +145,30 @@ class EditTransactionPage extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          _buildAttachmentSelectField(context, e),
+          _buildAttachmentSelectField(context),
         ],
       ),
     );
   }
 
-  Widget _buildFromAccount(EditTransactionModel e) {
+  Widget _buildTransactionTitle() {
+    return StreamBuilder<bool>(
+        stream: _vm.showTitle,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || !snapshot.data) {
+            return Container();
+          }
+          return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            child: TextFormField(
+              decoration: const InputDecoration(labelText: 'Titel'),
+              onChanged: _vm.updateTitle,
+            ),
+          );
+        });
+  }
+
+  Widget _buildFromAccount() {
     return Autocomplete<Account>(
       displayStringForOption: (account) => account.name,
       optionsBuilder: (TextEditingValue textEditingValue) {
@@ -178,7 +196,7 @@ class EditTransactionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildToAccount(EditTransactionModel e) {
+  Widget _buildToAccount() {
     return Autocomplete<Account>(
       displayStringForOption: (account) => account.name,
       optionsBuilder: (TextEditingValue textEditingValue) {
@@ -206,7 +224,7 @@ class EditTransactionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAttachmentSelectField(BuildContext c, EditTransactionModel e) {
+  Widget _buildAttachmentSelectField(BuildContext c) {
     return Container(
       width: MediaQuery.of(c).size.width,
       child: Wrap(
@@ -229,13 +247,13 @@ class EditTransactionPage extends StatelessWidget {
               ),
             ),
           ),
-          e.attachments.isNotEmpty
+          _vm.attachments.isNotEmpty
               ? const SizedBox()
               : const Padding(
                   padding: EdgeInsets.all(6.0),
                   child: Text('Keine Anhänge'),
                 ),
-          ...e.attachments.map((File item) {
+          ..._vm.attachments.map((File item) {
             return Chip(
               label: Text(item.uri.path.split('/').last),
               deleteIcon: const Icon(Icons.clear),
