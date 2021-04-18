@@ -14,13 +14,20 @@ class EditTransactionViewModel with ChangeNotifier {
 
   AccountRepository _accountRepository;
 
+  BuildContext _context;
+
   Stream<List<EditTransactionModelTransaction>> get splitTransactionsStream =>
       _editTransactionModel.transactionsSubject.stream;
 
   BehaviorSubject<EditTransactionModel> _editTransactionModelSubject;
   final BehaviorSubject<bool> _showTitle = BehaviorSubject.seeded(false);
+  final BehaviorSubject<bool> _inProgress = BehaviorSubject.seeded(false);
+  final BehaviorSubject<String> _errors = BehaviorSubject();
 
   Stream<bool> get showTitle => _showTitle.stream;
+  Stream<bool> get inProgress => _inProgress.stream;
+  Stream<String> get errors => _errors.stream;
+
   Stream<EditTransactionModel> get transactionStream =>
       _editTransactionModelSubject.stream;
 
@@ -45,6 +52,25 @@ class EditTransactionViewModel with ChangeNotifier {
     AccountType.debt,
     AccountType.mortgage
   };
+
+  EditTransactionViewModel(BuildContext context) {
+    _context = context;
+    AuthProvider a = Provider.of<AuthProvider>(context, listen: false);
+    _accountRepository = AccountRepository(a.authedClient);
+    _accountRepository.loadAccountsWithType([
+      AccountType.asset,
+      AccountType.revenue,
+      AccountType.loan,
+      AccountType.debt,
+      AccountType.mortgage
+    ]).listen((accounts) {
+      return allAccounts = accounts;
+    });
+    _editTransactionModelSubject =
+        BehaviorSubject.seeded(_editTransactionModel);
+    _editTransactionModel.transactionsSubject
+        .listen((List<EditTransactionModelTransaction> l) {});
+  }
 
   bool get deleteTransactionsEnabled =>
       _editTransactionModel.transactionSplits.length >= 2;
@@ -107,24 +133,6 @@ class EditTransactionViewModel with ChangeNotifier {
     return allAccounts.where((a) => _validToAccountTypes.contains(a.type));
   }
 
-  EditTransactionViewModel(BuildContext context) {
-    AuthProvider a = Provider.of<AuthProvider>(context, listen: false);
-    _accountRepository = AccountRepository(a.authedClient);
-    _accountRepository.loadAccountsWithType([
-      AccountType.asset,
-      AccountType.revenue,
-      AccountType.loan,
-      AccountType.debt,
-      AccountType.mortgage
-    ]).listen((accounts) {
-      return allAccounts = accounts;
-    });
-    _editTransactionModelSubject =
-        BehaviorSubject.seeded(_editTransactionModel);
-    _editTransactionModel.transactionsSubject
-        .listen((List<EditTransactionModelTransaction> l) {});
-  }
-
   void addFiles(List<File> l) {
     _editTransactionModel.addFiles(l);
     _editTransactionModelSubject.add(_editTransactionModel);
@@ -136,34 +144,41 @@ class EditTransactionViewModel with ChangeNotifier {
   }
 
   void saveTransactions() {
+    _inProgress.add(true);
     if (_editTransactionModel.transactionSplits.length == 1) {
       updateTitle(null);
     }
 
-    Transaction newTransaction = Transaction.createTransaction(
+    final Transaction newTransaction = Transaction.createTransaction(
         groupTitle: _editTransactionModel.transactionTitle);
 
-    for (var e in _editTransactionModel.transactionSplits) {
-      newTransaction.addSplit(
-          _editTransactionModel.fromAccount,
-          _editTransactionModel.toAccount,
-          e.amount,
-          e.description,
-          _editTransactionModel.transactionDate,
-          '');
-    }
-    print(newTransaction);
-    _editTransactionModel.fromAccount
-        .transfer(
-            transaction: newTransaction, accountUseCase: _accountRepository)
-        .listen((event) {
-      print(event);
+    Stream.fromIterable(_editTransactionModel.transactionSplits)
+        .map((e) => newTransaction.addSplit(
+            _editTransactionModel.fromAccount,
+            _editTransactionModel.toAccount,
+            e.amount,
+            e.description,
+            _editTransactionModel.transactionDate,
+            ''))
+        .flatMap((value) {
+      return _editTransactionModel.fromAccount.transfer(
+          transaction: newTransaction, accountUseCase: _accountRepository);
+    }).listen((event) {
+      _inProgress.add(false);
+      dispose();
+      Navigator.of(_context).pop();
     }, onError: (Object e) {
-      print(e);
+      _inProgress.add(false);
+      _errors.add(e.toString());
     });
   }
 
+  @override
   void dispose() {
+    super.dispose();
     _editTransactionModelSubject.close();
+    _inProgress.close();
+    _showTitle.close();
+    _errors.close();
   }
 }

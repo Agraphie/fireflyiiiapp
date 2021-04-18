@@ -32,6 +32,14 @@ class EditTransactionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _vm.errors.forEach((errorMsg) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMsg),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    });
     return Scaffold(
       backgroundColor: application.neutralBackground,
       appBar: AppBar(
@@ -47,38 +55,53 @@ class EditTransactionPage extends StatelessWidget {
           onPressed: _vm.addNewTransaction,
           tooltip: 'Add transaction split',
           child: const Icon(Icons.add)),
-      body: StreamBuilder<EditTransactionModel>(
-          stream: _vm.transactionStream,
-          builder: (context, transactionSnap) {
-            if (!transactionSnap.hasData) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            return Padding(
-              padding: const EdgeInsets.all(3.0),
-              child: ListView(children: <Widget>[
-                _buildGlobalInputs(context),
-                StreamBuilder<Iterable<EditTransactionModelTransaction>>(
-                    initialData: transactionSnap.data.transactionSplits,
-                    stream: _vm.splitTransactionsStream,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return Container();
-                      }
-                      return Column(
-                        children: <Widget>[
-                          ...snapshot.data
-                              .map((EditTransactionModelTransaction item) {
-                            return _buildSingleTransaction(item, context);
-                          }).toList(),
-                        ],
-                      );
-                    }),
-              ]),
-            );
-          }),
+      body: StreamBuilder<bool>(
+        stream: _vm.inProgress,
+        builder: (context, snapshot) => !snapshot.hasData || snapshot.data
+            ? _buildInProgress()
+            : _buildForm(),
+      ),
     );
+  }
+
+  Widget _buildInProgress() {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildForm() {
+    return StreamBuilder<EditTransactionModel>(
+        stream: _vm.transactionStream,
+        builder: (context, transactionSnap) {
+          if (!transactionSnap.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          return Padding(
+            padding: const EdgeInsets.all(3.0),
+            child: ListView(children: <Widget>[
+              _buildGlobalInputs(context),
+              StreamBuilder<Iterable<EditTransactionModelTransaction>>(
+                  initialData: transactionSnap.data.transactionSplits,
+                  stream: _vm.splitTransactionsStream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Container();
+                    }
+                    return Column(
+                      children: <Widget>[
+                        ...snapshot.data
+                            .map((EditTransactionModelTransaction item) {
+                          return _buildSingleTransaction(item, context);
+                        }).toList(),
+                      ],
+                    );
+                  }),
+            ]),
+          );
+        });
   }
 
   Widget _buildSingleTransaction(

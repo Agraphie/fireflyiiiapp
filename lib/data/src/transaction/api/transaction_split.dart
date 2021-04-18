@@ -20,8 +20,8 @@ abstract class TransactionSplit implements _$TransactionSplit {
       @JsonKey(name: 'destination_id') int destinationAccountId,
       String amount,
       DateTime date,
-      [@JsonKey(ignore: true) Account fromAccount,
-      @JsonKey(ignore: true) Account toAccount]) = _TransactionSplit;
+      [@nullable @JsonKey(ignore: true) Account fromAccount,
+      @nullable @JsonKey(ignore: true) Account toAccount]) = _TransactionSplit;
 
   factory TransactionSplit.fromJson(Map<String, dynamic> json) =>
       _$TransactionSplitFromJson(json);
