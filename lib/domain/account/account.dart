@@ -1,7 +1,7 @@
+import 'package:fireflyapp/domain/transaction/transaction.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'account.freezed.dart';
-
 part 'account.g.dart';
 
 @freezed
@@ -9,13 +9,21 @@ abstract class Account implements _$Account {
   const Account._();
 
   const factory Account(AccountType type, String name,
-      {String iban, String id}) = _Account;
+      {String iban,
+      String id,
+      @JsonKey(name: 'currency_symbol') String currencySymbol,
+      @JsonKey(name: 'current_balance') String currentBalance}) = _Account;
 
   factory Account.fromJson(Map<String, dynamic> json) =>
       _$AccountFromJson(json);
 
   Stream<List<Account>> loadAllAccounts(AccountUseCase a) {
     return a.loadAllAccounts();
+  }
+
+  Stream<Transaction> transfer(
+      {Transaction transaction, AccountUseCase accountUseCase}) {
+    return accountUseCase.transfer(this, transaction);
   }
 }
 
@@ -34,8 +42,14 @@ enum AccountType {
   liability,
   @JsonValue('liabilities')
   liabilities,
+  @JsonValue('loan')
+  loan,
   @JsonValue('initial-balance')
   initialBalance,
+  @JsonValue('mortgage')
+  mortgage,
+  @JsonValue('debt')
+  debt,
   @JsonValue('reconciliation')
   reconciliation
 }
@@ -43,9 +57,11 @@ enum AccountType {
 abstract class AccountUseCase {
   Stream<List<Account>> loadAllAccounts();
 
-  Stream<List<Account>> loadAccountsWithType(AccountType accountType);
+  Stream<List<Account>> loadAccountsWithType(List<AccountType> accountType);
 
   Stream<Account> createAccount(Account account);
 
   Stream<Account> updateAccount(Account account);
+
+  Stream<Transaction> transfer(Account fromAccount, Transaction transaction);
 }

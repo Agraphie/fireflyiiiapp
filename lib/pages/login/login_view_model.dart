@@ -35,8 +35,15 @@ class LoginViewModel with ChangeNotifier, WidgetsBindingObserver {
       _authProvider
           .login(
               _loginModel.baseUri, _loginModel.secret, _loginModel.identifier)
-          .then((_) => _loginState.add(LoginModelState.success))
-          .then((_) => Navigator.pop(_context));
+          .asStream()
+          .timeout(const Duration(seconds: 30))
+          .listen((event) {
+        _loginState.add(LoginModelState.success);
+        Navigator.pop(_context);
+      }, onError: (dynamic _) {
+        _loginModel.state = LoginModelState.error;
+        _loginState.add(LoginModelState.error);
+      });
     } else {
       _loginModel.state = LoginModelState.error;
       _loginState.add(LoginModelState.error);
@@ -96,6 +103,7 @@ class LoginViewModel with ChangeNotifier, WidgetsBindingObserver {
     _baseUri
         .where((s) => s.isNotEmpty)
         .debounceTime(defaultDebounceDuration)
+        .map((url) => url.trim())
         .listen((s) {
       if (_loginModel.baseUriValid) {
         _loginModel.baseUri = Uri.parse(s);
@@ -117,10 +125,10 @@ class LoginViewModel with ChangeNotifier, WidgetsBindingObserver {
   StreamTransformer<String, String> _buildUrlValidator() {
     return StreamTransformer<String, String>.fromHandlers(
         handleData: (uriString, sink) {
-      if (validators.isURL(uriString,
-          requireProtocol: true, requireTld: false)) {
+      String trimmed = uriString.trim();
+      if (validators.isURL(trimmed, requireProtocol: true, requireTld: false)) {
         _loginModel.baseUriValid = true;
-        sink.add(uriString);
+        sink.add(trimmed);
       } else {
         _loginModel.baseUriValid = false;
         sink.addError('Invalid URL');

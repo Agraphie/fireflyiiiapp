@@ -20,26 +20,26 @@ class JsonSerializableConverter extends JsonConverter {
     return jsonFactory(values) as T;
   }
 
-  List<T> _decodeList<T>(Iterable values) =>
-      values.where((dynamic v) => v != null).map<T>(_decode).toList();
+  List<T> _decodeList<T>(Iterable values) => values
+      .where((dynamic v) => v != null)
+      .map<T>((dynamic v) => _decode<T>(v) as T)
+      .toList();
 
   dynamic _decode<T>(dynamic entity) {
     if (entity is Iterable) return _decodeList<T>(entity);
 
-    if (entity is Map) return _decodeMap<T>(entity);
+    if (entity is Map<String, dynamic>) return _decodeMap<T>(entity);
 
     return entity;
   }
 
   @override
   Response<ResultType> convertResponse<ResultType, Item>(Response response) {
-    if (ResultType is String) {
-      return response.body as Response<ResultType>;
-    }
     // use [JsonConverter] to decode json
-    final jsonRes = super.convertResponse<ResultType, Item>(response);
+    final jsonRes = super.convertResponse<Map, dynamic>(response);
 
-    return jsonRes.copyWith<ResultType>(body: _decode<Item>(jsonRes.body));
+    return jsonRes.copyWith<ResultType>(
+        body: _decode<Item>(jsonRes.body) as ResultType);
   }
 
   @override

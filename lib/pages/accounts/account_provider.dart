@@ -13,5 +13,6 @@ class AccountProvider with ChangeNotifier {
 
   void doasd() {
     _accountRepository.loadAllAccounts().listen(print);
+    // _accountRepository.meh();
   }
 }

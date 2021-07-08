@@ -2,6 +2,7 @@ import 'package:chopper/chopper.dart';
 import 'package:fireflyapp/application.dart';
 import 'package:fireflyapp/data/data.dart';
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,6 +10,8 @@ import 'package:url_launcher/url_launcher.dart';
 final Uri redirectUrl = Uri.parse('http://empty');
 const String _credentialsKey = 'de.clemenskeppler.fireflyapp.OAUTH_CREDENTIALS';
 const String _baseUriKey = 'de.clemenskeppler.fireflyapp.LATEST_BASE_URI';
+const _fingerPrintEnabledSPKey =
+    'de.clemenskeppler.fireflyapp.FINGERPRINT_ENABLED';
 
 class AuthProvider with ChangeNotifier {
   FireflyHttpClient _fireflyHttpClient;
@@ -20,7 +23,7 @@ class AuthProvider with ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
 
   AuthProvider() {
-    Future<Uri> loadFromSp = loadFromSharedPreferences()
+    Future<Uri> loadFromSp = _loadFromSharedPreferences()
       ..then((_) {
         SharedPreferences.getInstance().then((sp) {
           String savedCredentials = sp.get(_credentialsKey) as String;
@@ -34,7 +37,7 @@ class AuthProvider with ChangeNotifier {
     _baseUri = Future.value(loadFromSp);
   }
 
-  Future<Uri> loadFromSharedPreferences() {
+  Future<Uri> _loadFromSharedPreferences() {
     return SharedPreferences.getInstance().then((sp) {
       String baseUri = sp.get(_baseUriKey) as String;
       if (baseUri != null && baseUri.isNotEmpty) {
@@ -101,6 +104,7 @@ class AuthProvider with ChangeNotifier {
   void _saveBaseUri(Uri uri) {
     SharedPreferences.getInstance().then(
         (SharedPreferences sp) => sp.setString(_baseUriKey, uri.toString()));
+    _baseUri = Future.value(uri);
   }
 
   Future<Uri> getBaseUri() {
@@ -116,7 +120,51 @@ class AuthProvider with ChangeNotifier {
     _fireflyHttpClient = null;
     _baseUri = null;
     _isLoggedIn = false;
+    deactivateFingerprint();
     Application.reset();
     notifyListeners();
+  }
+
+  Future<bool> fingerprintLoginActivated() {
+    return SharedPreferences.getInstance()
+        .then((sp) => sp.getBool(_fingerPrintEnabledSPKey) ?? false);
+  }
+
+  void deactivateFingerprint() {
+    SharedPreferences.getInstance().then(
+      (sp) {
+        sp.remove(_fingerPrintEnabledSPKey);
+      },
+    );
+  }
+
+  Future<bool> activateFingerprint() {
+    var la = LocalAuthentication();
+    return la
+        .authenticate(
+            localizedReason: 'Verify that it is you', biometricOnly: true)
+        .then((success) {
+      if (success) {
+        SharedPreferences.getInstance().then(
+          (sp) {
+            sp.setBool(_fingerPrintEnabledSPKey, true);
+          },
+        );
+      }
+      return success;
+    });
+  }
+
+  Future<bool> attemptFingerprintLogin() {
+    var la = LocalAuthentication();
+    return la
+        .authenticate(
+            localizedReason: 'Verify that it is you', biometricOnly: true)
+        .then((success) {
+      if (success) {
+        successfullyLoggedIn(success);
+      }
+      return success;
+    });
   }
 }
